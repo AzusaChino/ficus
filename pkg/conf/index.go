@@ -8,6 +8,7 @@ import (
 
 type App struct {
 	LogFileLocation string
+	TimeFormat      string
 }
 
 var AppConfig = &App{}
@@ -22,22 +23,33 @@ type Server struct {
 var ServerConfig = &Server{}
 
 type Kafka struct {
-	Host string
-	Port int
+	Locations []string
 }
 
 var KafkaConfig *Kafka
 
 func Setup() {
 	var err error
-	viper.SetConfigName("config")
+	viper.SetConfigName("application")
 	viper.SetConfigType("yml")
 	viper.AddConfigPath("conf")
 	if err = viper.ReadInConfig(); err != nil {
 		panic(fmt.Errorf("Fatal error when reading config file: %w \n", err))
 	}
-	kafkaMap := viper.GetStringMap("kafka")
+
+	AppConfig = &App{
+		LogFileLocation: viper.GetString("app.logFileLocation"),
+		TimeFormat:      viper.GetString("app.timeFormat"),
+	}
+
+	ServerConfig = &Server{
+		RunMode:      viper.GetString("server.runMode"),
+		HttpPort:     viper.GetInt("server.httpPort"),
+		ReadTimeout:  time.Duration(viper.GetInt("server.readTimeout")),
+		WriteTimeout: time.Duration(viper.GetInt("server.writeTimeout")),
+	}
+
 	KafkaConfig = &Kafka{
-		Host: kafkaMap["host"].(string),
+		Locations: viper.GetStringSlice("kafka.locations"),
 	}
 }

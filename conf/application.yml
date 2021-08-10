@@ -1,0 +1,10 @@
+app:
+  logFileLocation: ./logs
+  timeFormat: 2006-01-02 15:04:05
+server:
+  runMode: debug
+  httpPort: 8090
+  readTimeout: 60
+  writeTimeout: 60
+kafka:
+  locations: [localhost:9092]
