@@ -1,5 +1,8 @@
 app:
-  logFileLocation: ./logs
+  runtimeRootPath: runtime/
+  logFileLocation: logs
+  logFileSaveName: log
+  logFileExt: log
   timeFormat: 2006-01-02 15:04:05
 server:
   runMode: debug

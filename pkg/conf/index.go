@@ -7,7 +7,10 @@ import (
 )
 
 type App struct {
+	RuntimeRootPath string
 	LogFileLocation string
+	LogFileSaveName string
+	LogFileExt      string
 	TimeFormat      string
 }
 
@@ -38,7 +41,10 @@ func Setup() {
 	}
 
 	AppConfig = &App{
+		RuntimeRootPath: viper.GetString("app.runtimeRootPath"),
 		LogFileLocation: viper.GetString("app.logFileLocation"),
+		LogFileSaveName: viper.GetString("app.logFileSaveName"),
+		LogFileExt:      viper.GetString("app.logFileExt"),
 		TimeFormat:      viper.GetString("app.timeFormat"),
 	}
 
