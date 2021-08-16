@@ -21,9 +21,9 @@ func init() {
 
 func main() {
 	gin.SetMode(conf.ServerConfig.RunMode)
-	router := routers.InitRouter()
-	endPoint := fmt.Sprintf("%d", conf.ServerConfig.HttpPort)
 
+	router := routers.InitRouter()
+	endPoint := fmt.Sprintf(":%d", conf.ServerConfig.HttpPort)
 	maxHeaderBytes := 1 << 20
 
 	server := &http.Server{
@@ -33,7 +33,9 @@ func main() {
 		WriteTimeout:   conf.ServerConfig.WriteTimeout,
 		MaxHeaderBytes: maxHeaderBytes,
 	}
+
 	log.Printf("[info] start http server listening %s", endPoint)
 
 	_ = server.ListenAndServe()
+
 }

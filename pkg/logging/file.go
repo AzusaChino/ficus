@@ -16,5 +16,6 @@ func getLogFileName() string {
 	return fmt.Sprintf("%s%s.%s",
 		conf.AppConfig.LogFileSaveName,
 		time.Now().Format(conf.AppConfig.TimeFormat),
-		conf.AppConfig.LogFileExt)
+		conf.AppConfig.LogFileExt,
+	)
 }

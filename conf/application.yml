@@ -1,9 +1,9 @@
 app:
   runtimeRootPath: runtime/
-  logFileLocation: logs
+  logFileLocation: logs/
   logFileSaveName: log
   logFileExt: log
-  timeFormat: 2006-01-02 15:04:05
+  timeFormat: 20060102
 server:
   runMode: debug
   httpPort: 8090

@@ -13,6 +13,7 @@ func InitRouter() *gin.Engine {
 	apiV1 := r.Group("/api/v1")
 	{
 		apiV1.POST("/logging/collect", v1.UploadFile)
+		apiV1.POST("/sample/hello", v1.Hello)
 	}
 	return r
 }

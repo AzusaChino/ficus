@@ -20,11 +20,10 @@ func UploadFile(c *gin.Context) {
 	// save tmp file
 	_ = c.SaveUploadedFile(file, tmpLoc+file.Filename)
 
-	Unzip(tmpLoc+file.Filename, "")
-
 	_ = pool.Pool.Submit(func() {
 		fmt.Println(file.Filename)
 	})
+	c.JSON(200, "OK")
 }
 
 // Unzip will decompress a zip archive, moving all files and folders
@@ -42,27 +41,30 @@ func Unzip(src string, dest string) ([]string, error) {
 	for _, f := range r.File {
 
 		// Store filename/path for returning and using later on
-		fpath := filepath.Join(dest, f.Name)
+		fPath := filepath.Join(dest, f.Name)
 
 		// Check for ZipSlip. More Info: http://bit.ly/2MsjAWE
-		if !strings.HasPrefix(fpath, filepath.Clean(dest)+string(os.PathSeparator)) {
-			return filenames, fmt.Errorf("%s: illegal file path", fpath)
+		if !strings.HasPrefix(fPath, filepath.Clean(dest)+string(os.PathSeparator)) {
+			return filenames, fmt.Errorf("%s: illegal file path", fPath)
 		}
 
-		filenames = append(filenames, fpath)
+		filenames = append(filenames, fPath)
 
 		if f.FileInfo().IsDir() {
 			// Make Folder
-			os.MkdirAll(fpath, os.ModePerm)
+			err = os.MkdirAll(fPath, os.ModePerm)
+			if err != nil {
+				return nil, err
+			}
 			continue
 		}
 
 		// Make File
-		if err = os.MkdirAll(filepath.Dir(fpath), os.ModePerm); err != nil {
+		if err = os.MkdirAll(filepath.Dir(fPath), os.ModePerm); err != nil {
 			return filenames, err
 		}
 
-		outFile, err := os.OpenFile(fpath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, f.Mode())
+		outFile, err := os.OpenFile(fPath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, f.Mode())
 		if err != nil {
 			return filenames, err
 		}
@@ -75,8 +77,14 @@ func Unzip(src string, dest string) ([]string, error) {
 		_, err = io.Copy(outFile, rc)
 
 		// Close the file without defer to close before next iteration of loop
-		outFile.Close()
-		rc.Close()
+		err = outFile.Close()
+		if err != nil {
+			return nil, err
+		}
+		err = rc.Close()
+		if err != nil {
+			return nil, err
+		}
 
 		if err != nil {
 			return filenames, err

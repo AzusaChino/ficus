@@ -37,7 +37,8 @@ func Setup() {
 	if err != nil {
 		log.Fatalf("logging setup error: %v", err)
 	}
-	logger = log.New(F, DefaultPrefix, log.LstdFlags)
+	// display millisecond
+	logger = log.New(F, DefaultPrefix, log.LstdFlags|log.Lmicroseconds|log.Llongfile)
 }
 
 // Debug output logs at debug level
