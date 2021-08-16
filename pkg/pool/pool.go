@@ -2,19 +2,22 @@ package pool
 
 import (
 	"fmt"
+	"github.com/AzusaChino/ficus/service/logging_service"
 	"github.com/panjf2000/ants/v2"
 	"log"
 	"runtime"
 	"time"
 )
 
-var Pool *ants.Pool
+// Pool only for read file and send to kafka
+var Pool *ants.PoolWithFunc
 
 func Setup() {
 	var err error
 	size := runtime.NumCPU()
 
-	Pool, err = ants.NewPool(size,
+	Pool, err = ants.NewPoolWithFunc(size,
+		logging_service.AsyncSend,
 		ants.WithExpiryDuration(100*time.Second),
 		ants.WithPanicHandler(func(i interface{}) {
 			log.Fatal(i)

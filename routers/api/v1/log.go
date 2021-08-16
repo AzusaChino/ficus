@@ -20,9 +20,9 @@ func UploadFile(c *gin.Context) {
 	// save tmp file
 	_ = c.SaveUploadedFile(file, tmpLoc+file.Filename)
 
-	_ = pool.Pool.Submit(func() {
-		fmt.Println(file.Filename)
-	})
+	// add args to pool
+	_ = pool.Pool.Invoke(file)
+
 	c.JSON(200, "OK")
 }
 
