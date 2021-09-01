@@ -23,11 +23,10 @@ func Setup() {
 	dataCollector, err = sarama.NewAsyncProducerFromClient(client)
 }
 
-func Close() error {
+func Close() {
 	if err := dataCollector.Close(); err != nil {
 		log.Println("Failed to shut down data collector cleanly", err)
 	}
-	return nil
 }
 
 func SendMessage(topic string, key string, value string) {

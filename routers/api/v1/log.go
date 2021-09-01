@@ -4,31 +4,39 @@ import (
 	"archive/zip"
 	"fmt"
 	"github.com/AzusaChino/ficus/pkg/pool"
-	"github.com/gin-gonic/gin"
+	"github.com/AzusaChino/ficus/service/logging_service"
+	"github.com/gofiber/fiber/v2"
 	"io"
+	"log"
+	"net/http"
 	"os"
 	"path/filepath"
 	"strings"
 )
 
-func UploadFile(c *gin.Context) {
+func UploadFile(c *fiber.Ctx) error {
 	file, err := c.FormFile("file")
 	if err != nil {
-		c.Error(err)
+		_ = c.SendStatus(http.StatusInternalServerError)
 	}
 	tmpLoc := ""
 	// save tmp file
-	_ = c.SaveUploadedFile(file, tmpLoc+file.Filename)
+	_ = c.SaveFile(file, tmpLoc+file.Filename)
 
 	// add args to pool
-	_ = pool.Pool.Invoke(file)
+	_ = pool.Pool.Submit(func() {
+		logging_service.AsyncSend(file)
+	})
 
-	c.JSON(200, "OK")
+	return c.JSON(fiber.Map{
+		"code":    http.StatusOK,
+		"message": "ok",
+	})
 }
 
 // Unzip will decompress a zip archive, moving all files and folders
 // within the zip file (parameter 1) to an output directory (parameter 2).
-func Unzip(src string, dest string) ([]string, error) {
+func _(src string, dest string) ([]string, error) {
 
 	var filenames []string
 
@@ -36,7 +44,12 @@ func Unzip(src string, dest string) ([]string, error) {
 	if err != nil {
 		return filenames, err
 	}
-	defer r.Close()
+	defer func(r *zip.ReadCloser) {
+		err := r.Close()
+		if err != nil {
+			log.Fatalf("err: %v", err)
+		}
+	}(r)
 
 	for _, f := range r.File {
 

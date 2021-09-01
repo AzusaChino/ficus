@@ -1,0 +1,23 @@
+version: "3.6"
+services:
+  ficus:
+    build:
+      dockerfile: Dockerfile
+    volumes:
+      # saving logs
+      - ./logs:/runtime/logs
+      # saving static files
+      - ./static:/static
+    ports:
+      - "8090:8090"
+    networks:
+      - ficus_network
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8090" ]
+      interval: 3m
+      timeout: 10s
+      retries: 3
+      start_period: 1m
+networks:
+  ficus_network:
+    driver: bridge

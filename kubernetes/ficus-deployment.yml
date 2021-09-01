@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: ficus
+  name: ficus-deployment
+spec:
+  selector:
+    matchLabels:
+      app: ficus
+  template:
+    metadata:
+      labels:
+        app: ficus
+    spec:
+      containers:
+        - name: ficus
+          image: azusachino/ficus:1.0.0
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8090
+          volumeMounts:
+            - mountPath: /conf/
+              name: ficus-conf
+            - mountPath: /runtimme
+              name: ficus-runtime
+              subPath: logs
+            - mountPath: /static
+              name: ficus-static
+          env:
+            - name: MYSQL_ROOT_PASSWORD
+              value: abcd
+      volumes:
+        - name: ficus-runtime
+          emptyDir: { }
+        - name: ficus-static
+          persistentVolumeClaim:
+            claimName: ficus-pvc
+        - name: ficus-conf
+          configMap:
+            name: ficus-config

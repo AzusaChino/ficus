@@ -1,5 +1,11 @@
 POST http://localhost:8090/api/v1/logging/collect
+Content-Type: multipart/form-data; boundary=WebAppBoundary
 
+--WebAppBoundary
+Content-Disposition: form-data; name="file"; filename="sample.log"
+
+< C:\Users\ycpang\Desktop\sample.log
+--WebAppBoundary--
 
 ###
 POST http://localhost:8090/api/v1/sample/hello

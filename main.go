@@ -7,7 +7,10 @@ import (
 	"github.com/AzusaChino/ficus/pkg/logging"
 	"github.com/AzusaChino/ficus/pkg/pool"
 	"github.com/AzusaChino/ficus/routers"
-	"github.com/gin-gonic/gin"
+	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/compress"
+	"github.com/gofiber/fiber/v2/middleware/cors"
+	"github.com/gofiber/fiber/v2/middleware/recover"
 	"log"
 	"net/http"
 )
@@ -20,22 +23,26 @@ func init() {
 }
 
 func main() {
-	gin.SetMode(conf.ServerConfig.RunMode)
+	defer pool.Pool.Release()
+	defer kafka.Close()
 
-	router := routers.InitRouter()
-	endPoint := fmt.Sprintf(":%d", conf.ServerConfig.HttpPort)
-	maxHeaderBytes := 1 << 20
-
-	server := &http.Server{
-		Addr:           endPoint,
-		Handler:        router,
-		ReadTimeout:    conf.ServerConfig.ReadTimeout,
-		WriteTimeout:   conf.ServerConfig.WriteTimeout,
-		MaxHeaderBytes: maxHeaderBytes,
+	cnf := fiber.Config{
+		ReadTimeout:  conf.ServerConfig.ReadTimeout,
+		WriteTimeout: conf.ServerConfig.WriteTimeout,
+		ErrorHandler: func(ctx *fiber.Ctx, err error) error {
+			return ctx.Status(http.StatusInternalServerError).JSON(fmt.Sprintf(`{"error":%v}`, err))
+		},
 	}
+	app := fiber.New(cnf)
+	app.Use(compress.New())
+	app.Use(cors.New())
+	app.Use(recover.New())
+
+	// first append url, second local folder
+	app.Static("/static", "./static")
+	routers.InitRouter(app)
+	endPoint := fmt.Sprintf(":%d", conf.ServerConfig.HttpPort)
 
 	log.Printf("[info] start http server listening %s", endPoint)
-
-	_ = server.ListenAndServe()
-
+	_ = app.Listen(endPoint)
 }
