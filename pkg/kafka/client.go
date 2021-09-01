@@ -18,7 +18,7 @@ func Setup() {
 
 	client, err := sarama.NewClient(conf.KafkaConfig.Locations, kafkaConfig)
 	if err != nil {
-		panic("failed to setup kafka client")
+		log.Fatalf("failed to setup kafka client, error: %v\n", err)
 	}
 	dataCollector, err = sarama.NewAsyncProducerFromClient(client)
 }

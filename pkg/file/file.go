@@ -72,7 +72,7 @@ func MustOpen(fileName, filePath string) (*os.File, error) {
 		return nil, fmt.Errorf("os.Getwd err: %v", err)
 	}
 
-	src := dir + "/" + filePath
+	src := fmt.Sprintf(`%s%s%s`, dir, string(os.PathSeparator), filePath)
 	perm := CheckPermission(src)
 	if perm == true {
 		return nil, fmt.Errorf("file.CheckPermission Permission denied src: %s", src)
@@ -83,7 +83,7 @@ func MustOpen(fileName, filePath string) (*os.File, error) {
 		return nil, fmt.Errorf("file.IsNotExistMkDir src: %s, err: %v", src, err)
 	}
 
-	f, err := Open(src+fileName, os.O_APPEND|os.O_CREATE|os.O_RDWR, 0644)
+	f, err := Open(fmt.Sprintf(`%s%s%s`, src, string(os.PathSeparator), fileName), os.O_APPEND|os.O_CREATE|os.O_RDWR, 0644)
 	if err != nil {
 		return nil, fmt.Errorf("Fail to OpenFile :%v", err)
 	}

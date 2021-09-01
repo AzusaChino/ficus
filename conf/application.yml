@@ -1,6 +1,6 @@
 app:
-  runtimeRootPath: runtime/
-  logFileLocation: logs/
+  runtimeRootPath: runtime
+  logFileLocation: logs
   logFileSaveName: log
   logFileExt: log
   timeFormat: 20060102
