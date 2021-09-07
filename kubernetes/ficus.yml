@@ -1,0 +1,102 @@
+# ficus pvc
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  namespace: ficus
+  name: ficus-pvc
+  labels:
+    app: ficus
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+---
+# ficus config
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  namespace: ficus
+  name: ficus-config
+  labels:
+    app: ficus
+data:
+  application.yml: |
+    app:
+      runtimeRootPath: runtime/
+      logFileLocation: logs/
+      logFileSaveName: log
+      logFileExt: log
+      timeFormat: 20060102
+    server:
+      runMode: debug
+      httpPort: 8090
+      readTimeout: 60
+      writeTimeout: 60
+    kafka:
+      locations: [ kafka-0.headless:9092,kafka-1.headless:9092,kafka-2.headless:9092 ]
+---
+# ficus service
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: ficus
+  name: ficus-service
+  labels:
+    app: ficus
+spec:
+  selector:
+    app: ficus
+  ports:
+    - port: 8090
+      targetPort: 8090
+---
+# ficus stateful set
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  namespace: ficus
+  name: ficus-deployment
+spec:
+  serviceName: ficus-service
+  replicas: 1
+  podManagementPolicy: OrderedReady
+  updateStrategy:
+    type: RollingUpdate
+  selector:
+    matchLabels:
+      app: ficus
+  template:
+    metadata:
+      labels:
+        app: ficus
+    spec:
+      containers:
+        - name: ficus
+          image: azusachino/ficus:1.0.0
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8090
+          volumeMounts:
+            - mountPath: /conf/
+              name: ficus-conf
+            - mountPath: /runtimme
+              name: ficus-runtime
+              subPath: logs
+            - mountPath: /static
+              name: ficus-static
+          env:
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+      volumes:
+        - name: ficus-runtime
+          emptyDir: { }
+        - name: ficus-static
+          persistentVolumeClaim:
+            claimName: ficus-pvc
+        - name: ficus-conf
+          configMap:
+            name: ficus-config
