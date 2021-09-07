@@ -7,7 +7,7 @@ ENV GO111MODULE on
 ENV GOPROXY https://goproxy.cn,direct
 RUN ["go", "mod", "download"]
 
-COPY /ficus .
+COPY . .
 RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o ficus .
 
 # setup running environment

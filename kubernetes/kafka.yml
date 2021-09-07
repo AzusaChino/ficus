@@ -63,7 +63,7 @@ spec:
   ports:
     - name: kafka
       port: 9092
-      targetPort: 9092
+      targetPort: kafka
 ---
 apiVersion: apps/v1
 kind: StatefulSet

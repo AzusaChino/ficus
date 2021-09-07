@@ -24,8 +24,8 @@ metadata:
 data:
   application.yml: |
     app:
-      runtimeRootPath: runtime/
-      logFileLocation: logs/
+      runtimeRootPath: runtime
+      logFileLocation: logs
       logFileSaveName: log
       logFileExt: log
       timeFormat: 20060102
@@ -37,6 +37,24 @@ data:
     kafka:
       locations: [ kafka-0.headless:9092,kafka-1.headless:9092,kafka-2.headless:9092 ]
 ---
+# ficus headless
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: ficus
+  name: ficus-headless
+  labels:
+    app: ficus
+spec:
+  type: ClusterIP
+  clusterIP: none
+  ports:
+    - name: ficus
+      port: 8090
+      targetPort: ficus
+  selector:
+    app: ficus
+---
 # ficus service
 apiVersion: v1
 kind: Service
@@ -46,11 +64,12 @@ metadata:
   labels:
     app: ficus
 spec:
+  type: ClusterIP
   selector:
     app: ficus
   ports:
     - port: 8090
-      targetPort: 8090
+      targetPort: ficus
 ---
 # ficus stateful set
 apiVersion: apps/v1
@@ -77,14 +96,16 @@ spec:
           image: azusachino/ficus:1.0.0
           imagePullPolicy: IfNotPresent
           ports:
-            - containerPort: 8090
+            - name: ficus
+              containerPort: 8090
           volumeMounts:
-            - mountPath: /conf/
+            # Dockerfile workdir is /root
+            - mountPath: /root/conf/
               name: ficus-conf
-            - mountPath: /runtimme
+            - mountPath: /root/runtimme
               name: ficus-runtime
               subPath: logs
-            - mountPath: /static
+            - mountPath: /root/static
               name: ficus-static
           env:
             - name: POD_NAME

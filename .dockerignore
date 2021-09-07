@@ -1,0 +1,7 @@
+conf/
+kubernetes/
+runtime/
+static/
+.gitignore
+README.md
+LICENSE

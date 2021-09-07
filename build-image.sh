@@ -1,9 +1,14 @@
-#!bin/sh
+#!/usr/bin/bash
 
 # load .env variables
 eval "$(echo $(cat .env))"
 
-IMAGE_NAME="$AUTHOR/$PROJECT:$VERSION"
+PUSH=$1
 
-docker build -t $IMAGE_NAME
-docker push $IMAGE_NAME
+IMAGE_NAME="$AUTHOR/$PROJECT:$VERSION"
+echo "building image $IMAGE_NAME, please wait..."
+
+docker build . -t $IMAGE_NAME
+if [ $PUSH ]; then
+  docker push $IMAGE_NAME
+fi
