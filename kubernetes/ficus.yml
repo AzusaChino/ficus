@@ -47,7 +47,8 @@ metadata:
     app: ficus
 spec:
   type: ClusterIP
-  clusterIP: none
+  clusterIP: None
+  publishNotReadyAddresses: true
   ports:
     - name: ficus
       port: 8090

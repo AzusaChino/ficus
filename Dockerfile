@@ -1,4 +1,4 @@
-FROM golang:latest as builder
+FROM golang:1.17 as builder
 LABEL maintainer="az <azusachino@yahoo.com>"
 WORKDIR /app
 COPY go.mod go.sum ./
@@ -11,8 +11,10 @@ COPY . .
 RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o ficus .
 
 # setup running environment
-FROM alpine:latest
-RUN apk --no-cache add ca-certificates
+FROM alpine:3.13
+# replace mirror at first
+RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.ustc.edu.cn/g' /etc/apk/repositories
+RUN apk add --update --no-cache ca-certificates
 WORKDIR /root
 COPY --from=builder /app/ficus .
 EXPOSE 8090
