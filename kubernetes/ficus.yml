@@ -1,23 +1,7 @@
-# ficus pvc
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  namespace: ficus
-  name: ficus-pvc
-  labels:
-    app: ficus
-spec:
-  accessModes:
-    - ReadWriteOnce
-  resources:
-    requests:
-      storage: 1Gi
----
 # ficus config
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  namespace: ficus
   name: ficus-config
   labels:
     app: ficus
@@ -35,13 +19,12 @@ data:
       readTimeout: 60
       writeTimeout: 60
     kafka:
-      locations: [ kafka-0.headless:9092,kafka-1.headless:9092,kafka-2.headless:9092 ]
+      locations: [ kafka-service:9092 ]
 ---
 # ficus headless
 apiVersion: v1
 kind: Service
 metadata:
-  namespace: ficus
   name: ficus-headless
   labels:
     app: ficus
@@ -60,26 +43,28 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  namespace: ficus
   name: ficus-service
   labels:
     app: ficus
 spec:
-  type: ClusterIP
+  # using node port for local dev
+  type: NodePort
   selector:
     app: ficus
   ports:
     - port: 8090
       targetPort: ficus
+      nodePort: 30090
 ---
 # ficus stateful set
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  namespace: ficus
-  name: ficus-deployment
+  name: ficus
+  labels:
+    app: ficus
 spec:
-  serviceName: ficus-service
+  serviceName: ficus-headless
   replicas: 1
   podManagementPolicy: OrderedReady
   updateStrategy:
@@ -104,21 +89,26 @@ spec:
             - mountPath: /root/conf/
               name: ficus-conf
             - mountPath: /root/runtimme
-              name: ficus-runtime
+              name: ficus-data
               subPath: logs
             - mountPath: /root/static
-              name: ficus-static
+              name: ficus-data
           env:
             - name: POD_NAME
               valueFrom:
                 fieldRef:
                   fieldPath: metadata.name
       volumes:
-        - name: ficus-runtime
-          emptyDir: { }
-        - name: ficus-static
-          persistentVolumeClaim:
-            claimName: ficus-pvc
         - name: ficus-conf
           configMap:
             name: ficus-config
+  volumeClaimTemplates:
+    - metadata:
+        name: ficus-data
+      spec:
+        storageClassName: standard
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 1Gi

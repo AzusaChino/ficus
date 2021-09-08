@@ -1,46 +1,31 @@
-# pvc for kafka
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  namespace: ficus
-  name: kafka-pvc
-  labels:
-    app: kafka
-spec:
-  accessModes:
-    - ReadWriteOnce
-  resources:
-    requests:
-      storage: 512Mi
 ---
 # env for kafka
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  namespace: ficus
   name: kafka-env
   labels:
     app: kafka
 data:
-  KAFKA_CFG_ZOOKEEPER_CONNECT: zookeeper:2181
-  KAFKA_CFG_LISTENERS: PLAINTEXT://:9092
-  KAFKA_CFG_ADVERTISED_LISTENERS: PLAINTEXT://$(MY_POD_NAME).kafka-headless:9092
-  ALLOW_PLAINTEXT_LISTENER: yes
+  KAFKA_PORT_NUMBER: "9092"
+  KAFKA_CFG_ZOOKEEPER_CONNECT: "zookeeper" # zk service name
+  KAFKA_CFG_LISTENERS: "PLAINTEXT://:$(KAFKA_PORT_NUMBER)"
+  KAFKA_CFG_ADVERTISED_LISTENERS: "PLAINTEXT://$(MY_POD_NAME).kafka-headless:$(KAFKA_PORT_NUMBER)"
+  ALLOW_PLAINTEXT_LISTENER: "yes"
   KAFKA_HEAP_OPTS: "-Xms256m -Xmx512m"
-  KAFKA_CFG_LOGS_DIRS: /opt/bitnami/kafka/data
-  JMX_PORT: 9988
+  KAFKA_CFG_LOGS_DIRS: "/opt/bitnami/kafka/data"
+  JMX_PORT: "9988"
 ---
 #部署 Service Headless，用于Kafka间相互通信
 apiVersion: v1
 kind: Service
 metadata:
-  namespace: ficus
   name: kafka-headless
   labels:
     app: kafka
 spec:
   type: ClusterIP
-  clusterIP: none
+  clusterIP: None
   ports:
     - name: kafka
       port: 9092
@@ -52,7 +37,6 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  namespace: ficus
   name: kafka-service
   labels:
     app: kafka
@@ -68,12 +52,11 @@ spec:
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  namespace: ficus
-  name: kafka-stateful
+  name: kafka
   labels:
     app: kafka
 spec:
-  replicas: 3
+  replicas: 1
   selector:
     matchLabels:
       app: kafka
@@ -104,6 +87,10 @@ spec:
           volumeMounts:
             - mountPath: /bitnami/kafka
               name: kafka-data
+          # order problem, MY_POD_NAME will not take effect in pod
+          #          envFrom:
+          #            - configMapRef:
+          #                name: kafka-env
           env:
             - name: MY_POD_IP
               valueFrom:
@@ -113,9 +100,22 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: metadata.name
-          envFrom:
-            - configMapRef:
-                name: kafka-env
+            - name: KAFKA_CFG_ZOOKEEPER_CONNECT
+              value: "zookeeper" #Zookeeper Service 名称
+            - name: KAFKA_PORT_NUMBER
+              value: "9092"
+            - name: KAFKA_CFG_LISTENERS
+              value: "PLAINTEXT://:$(KAFKA_PORT_NUMBER)"
+            - name: KAFKA_CFG_ADVERTISED_LISTENERS
+              value: "PLAINTEXT://$(MY_POD_NAME).kafka-headless:$(KAFKA_PORT_NUMBER)"
+            - name: ALLOW_PLAINTEXT_LISTENER
+              value: "yes"
+            - name: KAFKA_HEAP_OPTS
+              value: "-Xms256m -Xmx512m"
+            - name: KAFKA_CFG_LOGS_DIRS
+              value: /opt/bitnami/kafka/data
+            - name: JMX_PORT
+              value: "9988"
           ports:
             - name: kafka
               containerPort: 9092
@@ -135,7 +135,13 @@ spec:
             timeoutSeconds: 5
             successThreshold: 1
             failureThreshold: 5
-      volumes:
-        - name: kafka-data
-          persistentVolumeClaim:
-            claimName: kafka-pvc
+  volumeClaimTemplates:
+    - metadata:
+        name: kafka-data
+      spec:
+        storageClassName: standard
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 512Mi
