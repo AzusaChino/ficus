@@ -1,4 +1,4 @@
-package middleware
+package opentracing
 
 import (
 	"fmt"

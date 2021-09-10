@@ -3,7 +3,8 @@ package main
 import (
 	"fmt"
 	"github.com/AzusaChino/ficus/global"
-	"github.com/AzusaChino/ficus/internal/middleware"
+	"github.com/AzusaChino/ficus/internal/middleware/fiberprometheus"
+	"github.com/AzusaChino/ficus/internal/middleware/opentracing"
 	"github.com/AzusaChino/ficus/internal/routers"
 	"github.com/AzusaChino/ficus/pkg/conf"
 	"github.com/AzusaChino/ficus/pkg/kafka"
@@ -50,7 +51,12 @@ func main() {
 	app.Use(cors.New())
 	app.Use(logger.New())
 	app.Use(recover.New())
-	app.Use(middleware.Tracing())
+	app.Use(opentracing.Tracing())
+
+	// prometheus metric
+	prometheus := fiberprometheus.New(appName)
+	prometheus.RegisterAt(app, "/metrics")
+	app.Use(prometheus.Do)
 
 	// first append url, second local folder
 	app.Static("/static", "./static")
