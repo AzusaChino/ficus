@@ -6,8 +6,7 @@ import (
 	"log"
 )
 
-func _() {
-	app := fiber.New()
+func _(app *fiber.App) {
 
 	// GET /api/register
 	app.Get("/api/*", func(c *fiber.Ctx) error {

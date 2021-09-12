@@ -1,4 +1,4 @@
-package ws
+package v1
 
 import (
 	"github.com/gofiber/fiber/v2"
@@ -6,21 +6,8 @@ import (
 	"log"
 )
 
-func _(app *fiber.App) {
-
-	// 1. enable ws middleware
-	app.Use("/ws", func(c *fiber.Ctx) error {
-		// IsWebSocketUpgrade returns true if the client
-		// requested upgrade to the WebSocket protocol.
-		if websocket.IsWebSocketUpgrade(c) {
-			c.Locals("allowed", true)
-			return c.Next()
-		}
-		return fiber.ErrUpgradeRequired
-	})
-
-	// 2. sample ws usage
-	app.Get("/ws/:id", websocket.New(func(conn *websocket.Conn) {
+func WsHandler() fiber.Handler {
+	return websocket.New(func(conn *websocket.Conn) {
 		log.Println(conn.Locals("allowed"))
 		log.Println(conn.Params("id"))
 		log.Println(conn.Query("v"))
@@ -41,5 +28,5 @@ func _(app *fiber.App) {
 				log.Fatalf("write error: %v\n", err)
 			}
 		}
-	}))
+	})
 }
