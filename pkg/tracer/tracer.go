@@ -1,29 +1,36 @@
 package tracer
 
 import (
+	"fmt"
 	"github.com/opentracing/opentracing-go"
 	"github.com/uber/jaeger-client-go/config"
-	"io"
-	"time"
 )
 
-func NewJaegerTracer(serviceName, agentHostPort string) (opentracing.Tracer, io.Closer, error) {
-	cfg := &config.Configuration{
-		ServiceName: serviceName,
-		Sampler: &config.SamplerConfig{
-			Type:  "const",
-			Param: 1,
-		},
-		Reporter: &config.ReporterConfig{
-			LogSpans:            true,
-			BufferFlushInterval: 1 * time.Second,
-			LocalAgentHostPort:  agentHostPort,
-		},
+func New(c Config) {
+	cfg := configDefault(c)
+	tracer := InitJaeger(cfg)
+	opentracing.SetGlobalTracer(tracer)
+	return
+}
+
+func InitJaeger(c Config) opentracing.Tracer {
+	cfg := config.Configuration{
+		ServiceName: c.ServiceName,
+		Sampler:     c.Sampler,
+		Reporter:    c.Reporter,
+		RPCMetrics:  c.EnableRpcMetrics,
+		Headers:     c.Headers,
+		Tags:        c.tags,
 	}
+
 	tracer, closer, err := cfg.NewTracer()
 	if err != nil {
-		return nil, nil, err
+		if c.PanicOnError {
+			panic("Init jaeger failed")
+		} else {
+			fmt.Println("init jaeger failed")
+		}
 	}
-	opentracing.SetGlobalTracer(tracer)
-	return tracer, closer, err
+	c.closer = closer.Close
+	return tracer
 }

@@ -2,9 +2,8 @@ package main
 
 import (
 	"fmt"
-	"github.com/AzusaChino/ficus/global"
 	"github.com/AzusaChino/ficus/internal/middleware/fiberprometheus"
-	"github.com/AzusaChino/ficus/internal/middleware/opentracing"
+	"github.com/AzusaChino/ficus/internal/middleware/fibertracing"
 	"github.com/AzusaChino/ficus/internal/routers"
 	"github.com/AzusaChino/ficus/pkg/conf"
 	"github.com/AzusaChino/ficus/pkg/kafka"
@@ -16,6 +15,7 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/gofiber/fiber/v2/middleware/recover"
+	"github.com/opentracing/opentracing-go"
 	"log"
 	"net/http"
 	"os"
@@ -24,15 +24,10 @@ import (
 )
 
 func init() {
-	var err error
 	conf.Setup()
 	logging.Setup()
 	kafka.Setup()
 	pool.Setup()
-	err = setupTracer()
-	if err != nil {
-		log.Fatalf("failed to setup tracer: %v\n", err)
-	}
 }
 
 func main() {
@@ -51,7 +46,12 @@ func main() {
 	app.Use(cors.New())
 	app.Use(logger.New())
 	app.Use(recover.New())
-	app.Use(opentracing.Tracing())
+	tracer.New(tracer.Config{
+		ServiceName: appName,
+	})
+	app.Use(fibertracing.New(fibertracing.Config{
+		Tracer: opentracing.GlobalTracer(),
+	}))
 
 	// prometheus metric
 	prometheus := fiberprometheus.New(appName)
@@ -85,13 +85,4 @@ func main() {
 		log.Fatalf("app shutdown error: %v\n", err)
 	}
 	log.Println("server shut down finished.")
-}
-
-func setupTracer() error {
-	jaegerTracer, _, err := tracer.NewJaegerTracer("ficus", "127.0.0.1:6831")
-	if err != nil {
-		return err
-	}
-	global.Tracer = jaegerTracer
-	return nil
 }
