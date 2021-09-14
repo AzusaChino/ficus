@@ -109,25 +109,27 @@ func (ps *FiberPrometheus) RegisterAt(app *fiber.App, url string) {
 	app.Get(ps.defaultUrl, adaptor.HTTPHandler(promhttp.Handler()))
 }
 
-func (ps *FiberPrometheus) Do(ctx *fiber.Ctx) error {
-	start := time.Now()
-	r := ctx.Route()
-	method := r.Method
-	path := r.Path
+func (ps *FiberPrometheus) Do() fiber.Handler {
+	return func(ctx *fiber.Ctx) error {
+		start := time.Now()
+		r := ctx.Route()
+		method := r.Method
+		path := r.Path
 
-	if path == ps.defaultUrl {
-		return ctx.Next()
+		if path == ps.defaultUrl {
+			return ctx.Next()
+		}
+
+		ps.requestInflight.WithLabelValues(method, path).Inc()
+		defer func() {
+			ps.requestInflight.WithLabelValues(method, path).Dec()
+		}()
+
+		statusCode := strconv.Itoa(ctx.Response().StatusCode())
+		ps.requestTotal.WithLabelValues(statusCode, method, path).Inc()
+
+		elapsed := float64(time.Since(start).Nanoseconds()) / 1000000000
+		ps.requestDuration.WithLabelValues(statusCode, method, path).Observe(elapsed)
+		return nil
 	}
-
-	ps.requestInflight.WithLabelValues(method, path).Inc()
-	defer func() {
-		ps.requestInflight.WithLabelValues(method, path).Dec()
-	}()
-
-	statusCode := strconv.Itoa(ctx.Response().StatusCode())
-	ps.requestTotal.WithLabelValues(statusCode, method, path).Inc()
-
-	elapsed := float64(time.Since(start).Nanoseconds()) / 1000000000
-	ps.requestDuration.WithLabelValues(statusCode, method, path).Observe(elapsed)
-	return nil
 }

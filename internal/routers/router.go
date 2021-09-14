@@ -12,7 +12,13 @@ func InitRouter(app *fiber.App) {
 	apiV1 := app.Group("/api/v1")
 	{
 		apiV1.Post("/logging/collect", v1.UploadFile)
-		apiV1.Post("/sample/hello", v1.Hello)
+		apiV1.Get("/hello/:person", v1.Hello)
+		apiV1.Post("/hi/:person", v1.Hello)
+
+		apiV1Grpc := apiV1.Group("/grpc")
+		{
+			apiV1Grpc.Get("/hello/:msg", v1.SayHello)
+		}
 	}
 
 	// ws router

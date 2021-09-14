@@ -10,4 +10,7 @@ server:
   readTimeout: 60
   writeTimeout: 60
 kafka:
-  locations: [localhost:9092]
+  locations: [ 127.0.0.1:9092 ]
+grpc:
+  server: 127.0.0.1
+  port: 50051

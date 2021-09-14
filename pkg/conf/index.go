@@ -31,31 +31,45 @@ type Kafka struct {
 
 var KafkaConfig *Kafka
 
+type Grpc struct {
+	Server string
+	Port   string
+}
+
+var GrpcConfig *Grpc
+
 func Setup() {
 	var err error
-	viper.SetConfigName("application")
-	viper.SetConfigType("yml")
-	viper.AddConfigPath("conf")
-	if err = viper.ReadInConfig(); err != nil {
+	// using local viper, not global one
+	vp := viper.New()
+	vp.SetConfigName("application")
+	vp.SetConfigType("yml")
+	vp.AddConfigPath("conf")
+	if err = vp.ReadInConfig(); err != nil {
 		panic(fmt.Errorf("Fatal error when reading config file: %w \n", err))
 	}
 
 	AppConfig = &App{
-		RuntimeRootPath: viper.GetString("app.runtimeRootPath"),
-		LogFileLocation: viper.GetString("app.logFileLocation"),
-		LogFileSaveName: viper.GetString("app.logFileSaveName"),
-		LogFileExt:      viper.GetString("app.logFileExt"),
-		TimeFormat:      viper.GetString("app.timeFormat"),
+		RuntimeRootPath: vp.GetString("app.runtimeRootPath"),
+		LogFileLocation: vp.GetString("app.logFileLocation"),
+		LogFileSaveName: vp.GetString("app.logFileSaveName"),
+		LogFileExt:      vp.GetString("app.logFileExt"),
+		TimeFormat:      vp.GetString("app.timeFormat"),
 	}
 
 	ServerConfig = &Server{
-		RunMode:      viper.GetString("server.runMode"),
-		HttpPort:     viper.GetInt("server.httpPort"),
-		ReadTimeout:  time.Duration(viper.GetInt("server.readTimeout")),
-		WriteTimeout: time.Duration(viper.GetInt("server.writeTimeout")),
+		RunMode:      vp.GetString("server.runMode"),
+		HttpPort:     vp.GetInt("server.httpPort"),
+		ReadTimeout:  time.Duration(vp.GetInt("server.readTimeout")),
+		WriteTimeout: time.Duration(vp.GetInt("server.writeTimeout")),
 	}
 
 	KafkaConfig = &Kafka{
-		Locations: viper.GetStringSlice("kafka.locations"),
+		Locations: vp.GetStringSlice("kafka.locations"),
+	}
+
+	GrpcConfig = &Grpc{
+		Server: vp.GetString("grpc.server"),
+		Port:   vp.GetString("grpc.port"),
 	}
 }

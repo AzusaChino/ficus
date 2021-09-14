@@ -40,12 +40,21 @@ func main() {
 		ErrorHandler: func(ctx *fiber.Ctx, err error) error {
 			return ctx.Status(http.StatusInternalServerError).JSON(fmt.Sprintf(`{"error":%v}`, err))
 		},
+		AppName: appName,
 	}
 	app := fiber.New(cnf)
 	app.Use(compress.New())
 	app.Use(cors.New())
-	app.Use(logger.New())
-	app.Use(recover.New())
+	app.Use(logger.New(
+		logger.Config{
+			Format:     "[${time}] ${pid} ${status} - ${method} ${path} ${latency}\n",
+			TimeFormat: "2006-01-02 15:04:05",
+			TimeZone:   "Asia/Shanghai",
+		}))
+	app.Use(recover.New(
+		recover.Config{
+			EnableStackTrace: true,
+		}))
 	tracer.New(tracer.Config{
 		ServiceName: appName,
 	})
@@ -53,21 +62,22 @@ func main() {
 		Tracer: opentracing.GlobalTracer(),
 	}))
 
+	routers.InitRouter(app)
+
 	// prometheus metric
 	prometheus := fiberprometheus.New(appName)
 	prometheus.RegisterAt(app, "/metrics")
-	app.Use(prometheus.Do)
+	app.Use(prometheus.Do())
 
 	// first append url, second local folder
 	app.Static("/static", "./static")
-	routers.InitRouter(app)
 
 	// 404 handler
 	app.Use(func(c *fiber.Ctx) error {
 		return c.SendStatus(http.StatusNotFound)
 	})
 	endPoint := fmt.Sprintf(":%d", conf.ServerConfig.HttpPort)
-	log.Printf("[info] start http server listening %s", endPoint)
+	log.Printf("start http server listening %s", endPoint)
 
 	go func() {
 		if err := app.Listen(endPoint); err != nil && app.Server() != nil {
