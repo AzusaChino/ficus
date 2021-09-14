@@ -23,6 +23,9 @@ import (
 	"syscall"
 )
 
+const appName = "ficus"
+const version = "1.0.0"
+
 func init() {
 	conf.Setup()
 	logging.Setup()

@@ -11,9 +11,9 @@ import (
 	"time"
 )
 
-var addr = fmt.Sprintf("%s:%s", conf.GrpcConfig.Server, conf.GrpcConfig.Port)
-
 func SayHello(msg string) (string, error) {
+	// move inside (late initializing)
+	var addr = fmt.Sprintf("%s:%s", conf.GrpcConfig.Server, conf.GrpcConfig.Port)
 	ctx := context.Background()
 	conn, err := grpc.DialContext(ctx, addr, grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {
