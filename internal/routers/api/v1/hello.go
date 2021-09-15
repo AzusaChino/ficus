@@ -23,9 +23,7 @@ func Hello(c *fiber.Ctx) error {
 
 func SayHello(ctx *fiber.Ctx) error {
 	msg := ctx.Params("msg")
-	r, err := grpc_service.SayHello(msg)
-	if err != nil {
-		return err
-	}
+	fastCtx := ctx.Context()
+	r := grpc_service.DoHello(msg, fastCtx)
 	return ctx.SendString(r)
 }

@@ -1,6 +1,7 @@
 package tracer
 
 import (
+	"fmt"
 	"github.com/opentracing/opentracing-go"
 	"github.com/uber/jaeger-client-go"
 	"github.com/uber/jaeger-client-go/config"
@@ -29,12 +30,12 @@ var DefaultConfig = Config{
 	Reporter: &config.ReporterConfig{
 		LogSpans:            false,
 		BufferFlushInterval: 1 * time.Second,
-		LocalAgentHostPort:  "127.0.0.1:6831",
+		LocalAgentHostPort:  fmt.Sprintf("%s:%d", jaeger.DefaultUDPSpanServerHost, jaeger.DefaultUDPSpanServerPort),
 	},
 	EnableRpcMetrics: true,
 	Headers: &jaeger.HeadersConfig{
-		TraceBaggageHeaderPrefix: "ctx-",
-		TraceContextHeaderName:   "headerName",
+		TraceBaggageHeaderPrefix: jaeger.TraceBaggageHeaderPrefix,
+		TraceContextHeaderName:   jaeger.TraceContextHeaderName,
 	},
 	tags: []opentracing.Tag{
 		{Key: "hostname", Value: "hostname"},
