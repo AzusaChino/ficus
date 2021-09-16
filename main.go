@@ -8,6 +8,7 @@ import (
 	"github.com/AzusaChino/ficus/pkg/conf"
 	"github.com/AzusaChino/ficus/pkg/kafka"
 	"github.com/AzusaChino/ficus/pkg/logging"
+	"github.com/AzusaChino/ficus/pkg/mydb"
 	"github.com/AzusaChino/ficus/pkg/pool"
 	"github.com/AzusaChino/ficus/pkg/tracer"
 	"github.com/gofiber/fiber/v2"
@@ -24,18 +25,19 @@ import (
 )
 
 const appName = "ficus"
-const version = "1.0.0"
 
 func init() {
 	conf.Setup()
 	logging.Setup()
 	kafka.Setup()
 	pool.Setup()
+	mydb.SetUp()
 }
 
 func main() {
-	defer pool.Pool.Release()
+	defer pool.Close()
 	defer kafka.Close()
+	defer mydb.Close()
 
 	cnf := fiber.Config{
 		ReadTimeout:  conf.ServerConfig.ReadTimeout,

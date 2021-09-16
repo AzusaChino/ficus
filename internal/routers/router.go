@@ -14,6 +14,7 @@ func InitRouter(app *fiber.App) {
 		apiV1.Post("/logging/collect", v1.UploadFile)
 		apiV1.Get("/hello/:person", v1.Hello)
 		apiV1.Post("/hi/:person", v1.Hello)
+		apiV1.Get("/say/:name", v1.SayWhat)
 
 		apiV1Grpc := apiV1.Group("/grpc")
 		{

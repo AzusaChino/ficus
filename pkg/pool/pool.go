@@ -25,3 +25,9 @@ func Setup() {
 		panic(fmt.Errorf("error when setup ants pool: %v", err))
 	}
 }
+
+func Close() {
+	if Pool != nil {
+		Pool.Release()
+	}
+}

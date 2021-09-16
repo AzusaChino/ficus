@@ -9,6 +9,18 @@ import (
 	"google.golang.org/grpc/metadata"
 )
 
+var (
+	// custom tags for goFiber
+	httpTag = opentracing.Tag{
+		Key:   string(ext.SpanKind),
+		Value: "http",
+	}
+	fiberTag = opentracing.Tag{
+		Key:   string(ext.Component),
+		Value: "fiber",
+	}
+)
+
 func New(config Config) func(c *fiber.Ctx) error {
 	cfg := configDefault(config)
 	return func(c *fiber.Ctx) error {
@@ -31,7 +43,7 @@ func New(config Config) func(c *fiber.Ctx) error {
 
 		// treat every http connection as span starter (in current application)
 		if spanCtx, err := opentracing.GlobalTracer().Extract(opentracing.HTTPHeaders, opentracing.HTTPHeadersCarrier(hdr)); err != nil {
-			span = tracer.StartSpan(operationName)
+			span = tracer.StartSpan(operationName, httpTag, fiberTag)
 		} else {
 			span = tracer.StartSpan(operationName, ext.RPCServerOption(spanCtx))
 		}
