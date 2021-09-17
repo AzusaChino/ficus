@@ -4,24 +4,40 @@ import (
 	"context"
 	"fmt"
 	"github.com/AzusaChino/ficus/pkg/conf"
+	"github.com/AzusaChino/ficus/pkg/etcd"
 	"github.com/AzusaChino/ficus/pkg/rpc"
 	pb "github.com/AzusaChino/ficus/service/grpc_service/proto/hello"
 	"github.com/google/uuid"
 	"github.com/opentracing/opentracing-go"
 	"github.com/valyala/fasthttp"
+	"go.etcd.io/etcd/client/v3/naming/resolver"
 	"google.golang.org/grpc"
 	"log"
 	"time"
 )
 
+var serviceName = "myrica-grpc-server"
+
 func DoHello(msg string, ctx *fasthttp.RequestCtx) string {
 	var addr = fmt.Sprintf("%s:%s", conf.GrpcConfig.Server, conf.GrpcConfig.Port)
+	var opts []grpc.DialOption
+	// use etcd as service discovery
+	var target = fmt.Sprintf("/etcdv3://ficus/grpc/%s", serviceName)
+	// TODO go through etcd
+	if addr == "" {
+		addr = target
+		builder, err := resolver.NewBuilder(etcd.Client)
+		if err != nil {
+			log.Panic(err)
+		}
+		opts = append(opts, grpc.WithResolvers(builder))
+	}
 	// fetch custom values from ctx.Locals()
 	c := ctx.UserValue("ctx").(context.Context)
 	tracer := ctx.UserValue("tracer").(opentracing.Tracer)
+	opts = append(opts, grpc.WithInsecure(), grpc.WithBlock(), grpc.WithUnaryInterceptor(rpc.ClientInterceptor(tracer)))
 	// wrap grpc client with interceptor
-	conn, err := grpc.DialContext(c, addr, grpc.WithInsecure(), grpc.WithBlock(),
-		grpc.WithUnaryInterceptor(rpc.ClientInterceptor(tracer)))
+	conn, err := grpc.DialContext(c, addr, opts...)
 	if err != nil {
 		log.Panic(err)
 	}

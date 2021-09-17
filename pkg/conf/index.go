@@ -38,6 +38,13 @@ type Grpc struct {
 
 var GrpcConfig *Grpc
 
+type ETCD struct {
+	EndPoints []string
+	Timeout   time.Duration
+}
+
+var EtcdConfig *ETCD
+
 func Setup() {
 	var err error
 	// using local viper, not global one
@@ -71,5 +78,10 @@ func Setup() {
 	GrpcConfig = &Grpc{
 		Server: vp.GetString("grpc.server"),
 		Port:   vp.GetString("grpc.port"),
+	}
+
+	EtcdConfig = &ETCD{
+		EndPoints: vp.GetStringSlice("etcd.endpoints"),
+		Timeout:   time.Duration(vp.GetInt("etcd.timeout")),
 	}
 }

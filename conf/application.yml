@@ -14,3 +14,6 @@ kafka:
 grpc:
   server: 127.0.0.1
   port: 50051
+etcd:
+  endpoints: [ 127.0.0.1:2379 ]
+  timeout: 60

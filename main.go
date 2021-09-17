@@ -6,6 +6,7 @@ import (
 	"github.com/AzusaChino/ficus/internal/middleware/fibertracing"
 	"github.com/AzusaChino/ficus/internal/routers"
 	"github.com/AzusaChino/ficus/pkg/conf"
+	"github.com/AzusaChino/ficus/pkg/etcd"
 	"github.com/AzusaChino/ficus/pkg/kafka"
 	"github.com/AzusaChino/ficus/pkg/logging"
 	"github.com/AzusaChino/ficus/pkg/mydb"
@@ -29,16 +30,17 @@ const appName = "ficus"
 func init() {
 	conf.Setup()
 	logging.Setup()
-	kafka.Setup()
 	pool.Setup()
+	kafka.Setup()
 	mydb.SetUp()
+	etcd.Setup()
 }
 
 func main() {
 	defer pool.Close()
 	defer kafka.Close()
 	defer mydb.Close()
-
+	defer etcd.Close()
 	cnf := fiber.Config{
 		ReadTimeout:  conf.ServerConfig.ReadTimeout,
 		WriteTimeout: conf.ServerConfig.WriteTimeout,
