@@ -3,9 +3,9 @@ package v1
 import (
 	"context"
 	"fmt"
-	"github.com/AzusaChino/ficus/pkg/pool"
-	"github.com/AzusaChino/ficus/service/grpc_service"
-	"github.com/AzusaChino/ficus/service/my_service"
+	"github.com/azusachino/ficus/pkg/pool"
+	"github.com/azusachino/ficus/service/grpc_service"
+	"github.com/azusachino/ficus/service/my_service"
 	"github.com/gofiber/fiber/v2"
 	"github.com/opentracing/opentracing-go"
 	"github.com/opentracing/opentracing-go/ext"

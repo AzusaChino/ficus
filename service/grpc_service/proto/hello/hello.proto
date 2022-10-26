@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package hello;
 
-option go_package = "github.com/AzusaChino/ficus/service/grpc_service/proto/hello";
+option go_package = "github.com/azusachino/ficus/service/grpc_service/proto/hello";
 
 service HelloService {
     rpc SayHello(Request) returns (Response);

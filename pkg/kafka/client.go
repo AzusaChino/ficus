@@ -1,8 +1,8 @@
 package kafka
 
 import (
-	"github.com/AzusaChino/ficus/pkg/conf"
 	"github.com/Shopify/sarama"
+	"github.com/azusachino/ficus/pkg/conf"
 	"log"
 	"time"
 )

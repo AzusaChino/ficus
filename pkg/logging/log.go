@@ -2,7 +2,7 @@ package logging
 
 import (
 	"fmt"
-	"github.com/AzusaChino/ficus/pkg/file"
+	"github.com/azusachino/ficus/pkg/file"
 	"log"
 	"os"
 	"path/filepath"

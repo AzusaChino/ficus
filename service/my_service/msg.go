@@ -1,7 +1,7 @@
 package my_service
 
 import (
-	"github.com/AzusaChino/ficus/pkg/mydb"
+	"github.com/azusachino/ficus/pkg/mydb"
 	"log"
 )
 

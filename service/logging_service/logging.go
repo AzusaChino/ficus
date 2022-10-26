@@ -3,7 +3,7 @@ package logging_service
 import (
 	"bufio"
 	"fmt"
-	"github.com/AzusaChino/ficus/pkg/kafka"
+	"github.com/azusachino/ficus/pkg/kafka"
 	"io/fs"
 	"log"
 	"os"

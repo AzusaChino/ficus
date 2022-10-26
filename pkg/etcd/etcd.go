@@ -1,7 +1,7 @@
 package etcd
 
 import (
-	"github.com/AzusaChino/ficus/pkg/conf"
+	"github.com/azusachino/ficus/pkg/conf"
 	"go.etcd.io/etcd/client/v3"
 	"log"
 )
