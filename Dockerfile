@@ -1,5 +1,5 @@
-FROM golang:1.17 as builder
-LABEL maintainer="az <azusachino@yahoo.com>"
+FROM golang:1.18 as builder
+LABEL maintainer="az <azusachino@duck.com>"
 WORKDIR /app
 COPY go.mod go.sum ./
 # for cn setup proxy
@@ -11,7 +11,7 @@ COPY . .
 RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o ficus .
 
 # setup running environment
-FROM alpine:3.13
+FROM alpine:latest
 # replace mirror at first
 RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.ustc.edu.cn/g' /etc/apk/repositories
 RUN apk add --update --no-cache ca-certificates
