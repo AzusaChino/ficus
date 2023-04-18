@@ -3,11 +3,12 @@ package logging_service
 import (
 	"bufio"
 	"fmt"
-	"github.com/AzusaChino/ficus/pkg/kafka"
 	"io/fs"
 	"log"
 	"os"
 	"syscall"
+
+	"github.com/azusachino/ficus/pkg/kafka"
 )
 
 const FicusMessageTopic = "FICUS_MESSAGE"

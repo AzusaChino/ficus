@@ -3,16 +3,17 @@ package v1
 import (
 	"archive/zip"
 	"fmt"
-	"github.com/AzusaChino/ficus/pkg/conf"
-	"github.com/AzusaChino/ficus/pkg/pool"
-	"github.com/AzusaChino/ficus/service/logging_service"
-	"github.com/gofiber/fiber/v2"
 	"io"
 	"log"
 	"net/http"
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/azusachino/ficus/pkg/conf"
+	"github.com/azusachino/ficus/pkg/pool"
+	"github.com/azusachino/ficus/service/logging_service"
+	"github.com/gofiber/fiber/v2"
 )
 
 func UploadFile(c *fiber.Ctx) error {

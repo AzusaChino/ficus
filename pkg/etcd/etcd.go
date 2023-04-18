@@ -1,9 +1,10 @@
 package etcd
 
 import (
-	"github.com/AzusaChino/ficus/pkg/conf"
-	"go.etcd.io/etcd/client/v3"
 	"log"
+
+	"github.com/azusachino/ficus/pkg/conf"
+	clientv3 "go.etcd.io/etcd/client/v3"
 )
 
 var Client *clientv3.Client

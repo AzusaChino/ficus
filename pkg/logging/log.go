@@ -2,11 +2,12 @@ package logging
 
 import (
 	"fmt"
-	"github.com/AzusaChino/ficus/pkg/file"
 	"log"
 	"os"
 	"path/filepath"
 	"runtime"
+
+	"github.com/azusachino/ficus/pkg/file"
 )
 
 type Level int

@@ -2,9 +2,10 @@ package logging
 
 import (
 	"fmt"
-	"github.com/AzusaChino/ficus/pkg/conf"
 	"os"
 	"time"
+
+	"github.com/azusachino/ficus/pkg/conf"
 )
 
 // getLogFilePath return log file path

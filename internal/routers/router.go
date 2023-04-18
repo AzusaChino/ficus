@@ -1,8 +1,8 @@
 package routers
 
 import (
-	"github.com/AzusaChino/ficus/internal/middleware/ws"
-	"github.com/AzusaChino/ficus/internal/routers/api/v1"
+	"github.com/azusachino/ficus/internal/middleware/ws"
+	v1 "github.com/azusachino/ficus/internal/routers/api/v1"
 	"github.com/gofiber/fiber/v2"
 )
 

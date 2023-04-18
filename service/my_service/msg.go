@@ -1,8 +1,9 @@
 package my_service
 
 import (
-	"github.com/AzusaChino/ficus/pkg/mydb"
 	"log"
+
+	"github.com/azusachino/ficus/pkg/mydb"
 )
 
 type Hello struct {

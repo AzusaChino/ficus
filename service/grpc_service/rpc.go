@@ -3,17 +3,18 @@ package grpc_service
 import (
 	"context"
 	"fmt"
-	"github.com/AzusaChino/ficus/pkg/conf"
-	"github.com/AzusaChino/ficus/pkg/etcd"
-	"github.com/AzusaChino/ficus/pkg/rpc"
-	pb "github.com/AzusaChino/ficus/service/grpc_service/proto/hello"
+	"log"
+	"time"
+
+	"github.com/azusachino/ficus/pkg/conf"
+	"github.com/azusachino/ficus/pkg/etcd"
+	"github.com/azusachino/ficus/pkg/rpc"
+	pb "github.com/azusachino/ficus/service/grpc_service/proto/hello"
 	"github.com/google/uuid"
 	"github.com/opentracing/opentracing-go"
 	"github.com/valyala/fasthttp"
 	"go.etcd.io/etcd/client/v3/naming/resolver"
 	"google.golang.org/grpc"
-	"log"
-	"time"
 )
 
 var serviceName = "myrica-grpc-server"
