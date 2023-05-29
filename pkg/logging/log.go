@@ -45,31 +45,31 @@ func Setup() {
 // Debug output logs at debug level
 func Debug(v ...interface{}) {
 	setPrefix(DEBUG)
-	logger.Println(v)
+	logger.Println(v...)
 }
 
 // Info output logs at info level
 func Info(v ...interface{}) {
 	setPrefix(INFO)
-	logger.Println(v)
+	logger.Println(v...)
 }
 
 // Warn output logs at warn level
 func Warn(v ...interface{}) {
 	setPrefix(WARN)
-	logger.Println(v)
+	logger.Println(v...)
 }
 
 // Error output logs at error level
 func Error(v ...interface{}) {
 	setPrefix(ERROR)
-	logger.Println(v)
+	logger.Println(v...)
 }
 
 // Fatal output logs at fatal level
 func Fatal(v ...interface{}) {
 	setPrefix(FATAL)
-	logger.Fatalln(v)
+	logger.Println(v...)
 }
 
 // setPrefix set the prefix of the log output

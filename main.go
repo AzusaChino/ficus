@@ -28,6 +28,7 @@ import (
 
 const appName = "ficus"
 
+// Init all necessary components
 func init() {
 	conf.Setup()
 	logging.Setup()
@@ -42,6 +43,7 @@ func main() {
 	defer kafka.Close()
 	defer mydb.Close()
 	defer etcd.Close()
+
 	cnf := fiber.Config{
 		ReadTimeout:  conf.ServerConfig.ReadTimeout,
 		WriteTimeout: conf.ServerConfig.WriteTimeout,
@@ -50,6 +52,7 @@ func main() {
 		},
 		AppName: appName,
 	}
+
 	app := fiber.New(cnf)
 	app.Use(compress.New())
 	app.Use(cors.New())
@@ -75,7 +78,7 @@ func main() {
 	// prometheus metric
 	prometheus := fiberprometheus.New(appName)
 	prometheus.RegisterAt(app, "/metrics")
-	app.Use(prometheus.Do())
+	app.Use(prometheus.Handler())
 
 	// first append url, second local folder
 	app.Static("/static", "./static")
@@ -84,8 +87,9 @@ func main() {
 	app.Use(func(c *fiber.Ctx) error {
 		return c.SendStatus(http.StatusNotFound)
 	})
+
 	endPoint := fmt.Sprintf(":%d", conf.ServerConfig.HttpPort)
-	log.Printf("start http server listening %s", endPoint)
+	log.Printf("start http server listening %s\n", endPoint)
 
 	go func() {
 		if err := app.Listen(endPoint); err != nil && app.Server() != nil {
@@ -93,6 +97,7 @@ func main() {
 		}
 	}()
 
+	// listen on INT/TERM
 	sign := make(chan os.Signal)
 	signal.Notify(sign, syscall.SIGINT, syscall.SIGTERM)
 	<-sign
@@ -102,5 +107,6 @@ func main() {
 	if err := app.Shutdown(); err != nil {
 		log.Fatalf("app shutdown error: %v\n", err)
 	}
-	log.Println("server shut down finished.")
+
+	log.Println("server shut down finished")
 }

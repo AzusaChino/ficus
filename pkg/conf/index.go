@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-type App struct {
+type FicusAppConfig struct {
 	RuntimeRootPath string
 	LogFileLocation string
 	LogFileSaveName string
@@ -14,7 +14,7 @@ type App struct {
 	TimeFormat      string
 }
 
-var AppConfig = &App{}
+var AppConfig = &FicusAppConfig{}
 
 type Server struct {
 	RunMode      string
@@ -53,10 +53,10 @@ func Setup() {
 	vp.SetConfigType("yml")
 	vp.AddConfigPath("conf")
 	if err = vp.ReadInConfig(); err != nil {
-		panic(fmt.Errorf("Fatal error when reading config file: %w \n", err))
+		panic(fmt.Errorf("fatal error when reading config file: %w", err))
 	}
 
-	AppConfig = &App{
+	AppConfig = &FicusAppConfig{
 		RuntimeRootPath: vp.GetString("app.runtimeRootPath"),
 		LogFileLocation: vp.GetString("app.logFileLocation"),
 		LogFileSaveName: vp.GetString("app.logFileSaveName"),
