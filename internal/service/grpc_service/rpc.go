@@ -6,10 +6,10 @@ import (
 	"log"
 	"time"
 
+	pb "github.com/azusachino/ficus/internal/service/grpc_service/proto/hello"
 	"github.com/azusachino/ficus/pkg/conf"
 	"github.com/azusachino/ficus/pkg/etcd"
 	"github.com/azusachino/ficus/pkg/rpc"
-	pb "github.com/azusachino/ficus/service/grpc_service/proto/hello"
 	"github.com/google/uuid"
 	"github.com/opentracing/opentracing-go"
 	"github.com/valyala/fasthttp"

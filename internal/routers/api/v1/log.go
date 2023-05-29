@@ -12,7 +12,7 @@ import (
 
 	"github.com/azusachino/ficus/pkg/conf"
 	"github.com/azusachino/ficus/pkg/pool"
-	"github.com/azusachino/ficus/service/logging_service"
+	"github.com/azusachino/ficus/internal/service/logging_service"
 	"github.com/gofiber/fiber/v2"
 )
 
