@@ -12,8 +12,6 @@ import (
 	"github.com/azusachino/ficus/internal/middleware/fibertracing"
 	"github.com/azusachino/ficus/internal/routers"
 	"github.com/azusachino/ficus/pkg/conf"
-	"github.com/azusachino/ficus/pkg/etcd"
-	"github.com/azusachino/ficus/pkg/kafka"
 	"github.com/azusachino/ficus/pkg/logging"
 	"github.com/azusachino/ficus/pkg/mydb"
 	"github.com/azusachino/ficus/pkg/pool"
@@ -30,23 +28,19 @@ const appName = "ficus"
 
 // Init all necessary components
 func init() {
-	conf.Setup()
 	logging.Setup()
 	pool.Setup()
-	kafka.Setup()
 	mydb.SetUp()
-	etcd.Setup()
 }
 
 func main() {
 	defer pool.Close()
-	defer kafka.Close()
 	defer mydb.Close()
-	defer etcd.Close()
 
+	serverConfig := conf.Config.Server
 	cnf := fiber.Config{
-		ReadTimeout:  conf.ServerConfig.ReadTimeout,
-		WriteTimeout: conf.ServerConfig.WriteTimeout,
+		ReadTimeout:  serverConfig.ReadTimeout,
+		WriteTimeout: serverConfig.WriteTimeout,
 		ErrorHandler: func(ctx *fiber.Ctx, err error) error {
 			return ctx.Status(http.StatusInternalServerError).JSON(fmt.Sprintf(`{"error":%v}`, err))
 		},
@@ -88,7 +82,7 @@ func main() {
 		return c.SendStatus(http.StatusNotFound)
 	})
 
-	endPoint := fmt.Sprintf(":%d", conf.ServerConfig.HttpPort)
+	endPoint := fmt.Sprintf(":%d", serverConfig.HttpPort)
 	log.Printf("start http server listening %s\n", endPoint)
 
 	go func() {
@@ -98,7 +92,7 @@ func main() {
 	}()
 
 	// listen on INT/TERM
-	sign := make(chan os.Signal)
+	sign := make(chan os.Signal, 1)
 	signal.Notify(sign, syscall.SIGINT, syscall.SIGTERM)
 	<-sign
 

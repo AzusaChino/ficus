@@ -10,22 +10,23 @@ server:
   readTimeout: 60
   writeTimeout: 60
 database:
-  dbType: postgre
+  # dbType: postgres
   dbName: db_ficus
-  username: root
-  password: 123456
-  host: 127.0.0.1:5432
+  dbUser: root
+  dbPass: 123456
+  dbHost: 127.0.0.1
+  dbPort: 5432
   tablePrefix: tb_
   charset: utf8
   maxIdleConns: 10
   maxOpenConns: 100
-kafka:
-  locations:
-    - 127.0.0.1:9092
-grpc:
-  server: 127.0.0.1
-  port: 50051
-etcd:
-  endpoints:
-    - 127.0.0.1:2379
-  timeout: 60
+# kafka:
+#   locations:
+#     - 127.0.0.1:9092
+# grpc:
+#   server: 127.0.0.1
+#   port: 50051
+# etcd:
+#   endpoints:
+#     - 127.0.0.1:2379
+#   timeout: 60

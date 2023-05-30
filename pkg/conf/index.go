@@ -2,86 +2,61 @@ package conf
 
 import (
 	"fmt"
-	"github.com/spf13/viper"
 	"time"
+
+	"github.com/spf13/viper"
 )
 
-type FicusAppConfig struct {
-	RuntimeRootPath string
-	LogFileLocation string
-	LogFileSaveName string
-	LogFileExt      string
-	TimeFormat      string
+var (
+	Config = &FicusConfig{
+		App:      AppConfig{},
+		Server:   ServerConfig{},
+		Database: DatabaseConfig{},
+	}
+)
+
+// FicusConfig the application config structure
+type FicusConfig struct {
+	App      AppConfig      `mapstructure:"app" json:"app" yaml:"app"`
+	Server   ServerConfig   `mapstructure:"server" json:"server" yaml:"server"`
+	Database DatabaseConfig `mapstructure:"database" json:"database" yaml:"database"`
 }
 
-var AppConfig = &FicusAppConfig{}
-
-type Server struct {
-	RunMode      string
-	HttpPort     int
-	ReadTimeout  time.Duration
-	WriteTimeout time.Duration
+type AppConfig struct {
+	RuntimeRootPath string `mapstructure:"runtimeRootPath" json:"runtimeRootPath" yaml:"runtimeRootPath"`
+	LogFileLocation string `mapstructure:"logFileLocation" json:"logFileLocation" yaml:"logFileLocation"`
+	LogFileSaveName string `mapstructure:"logFileSaveName" json:"logFileSaveName" yaml:"logFileSaveName"`
+	LogFileExt      string `mapstructure:"logFileExt" json:"logFileExt" yaml:"logFileExt"`
+	TimeFormat      string `mapstructure:"timeFormat" json:"timeFormat" yaml:"timeFormat"`
 }
 
-var ServerConfig = &Server{}
-
-type Kafka struct {
-	Locations []string
+type ServerConfig struct {
+	RunMode      string        `mapstructure:"runMode" json:"runMode" yaml:"runMode"`
+	HttpPort     int           `mapstructure:"httpPort" json:"httpPort" yaml:"httpPort"`
+	ReadTimeout  time.Duration `mapstructure:"readTimeout" json:"readTimeout" yaml:"readTimeout"`
+	WriteTimeout time.Duration `mapstructure:"writeTimeout" json:"writeTimeout" yaml:"writeTimeout"`
 }
 
-var KafkaConfig *Kafka
-
-type Grpc struct {
-	Server string
-	Port   string
+type DatabaseConfig struct {
+	DbName      string `mapstructure:"dbName" json:"dbName" yaml:"dbName"`
+	DbHost      string `mapstructure:"dbHost" json:"dbHost" yaml:"dbHost"`
+	DbPort      int    `mapstructure:"dbPort" json:"dbPort" yaml:"dbPort"`
+	DbUser      string `mapstructure:"dbUser" json:"dbUser" yaml:"dbUser"`
+	DbPass      string `mapstructure:"dbPass" json:"dbPass" yaml:"dbPass"`
+	TablePrefix string `mapstructure:"tablePrefix" json:"tablePrefix" yaml:"tablePrefix"`
 }
 
-var GrpcConfig *Grpc
-
-type ETCD struct {
-	EndPoints []string
-	Timeout   time.Duration
-}
-
-var EtcdConfig *ETCD
-
-func Setup() {
+func init() {
 	var err error
-	// using local viper, not global one
 	vp := viper.New()
-	vp.SetConfigName("application")
-	vp.SetConfigType("yml")
-	vp.AddConfigPath("conf")
+	vp.SetConfigName("ficus")
+	vp.SetConfigType("yaml")
+	vp.AddConfigPath("configs")
 	if err = vp.ReadInConfig(); err != nil {
 		panic(fmt.Errorf("fatal error when reading config file: %w", err))
 	}
-
-	AppConfig = &FicusAppConfig{
-		RuntimeRootPath: vp.GetString("app.runtimeRootPath"),
-		LogFileLocation: vp.GetString("app.logFileLocation"),
-		LogFileSaveName: vp.GetString("app.logFileSaveName"),
-		LogFileExt:      vp.GetString("app.logFileExt"),
-		TimeFormat:      vp.GetString("app.timeFormat"),
-	}
-
-	ServerConfig = &Server{
-		RunMode:      vp.GetString("server.runMode"),
-		HttpPort:     vp.GetInt("server.httpPort"),
-		ReadTimeout:  time.Duration(vp.GetInt("server.readTimeout")),
-		WriteTimeout: time.Duration(vp.GetInt("server.writeTimeout")),
-	}
-
-	KafkaConfig = &Kafka{
-		Locations: vp.GetStringSlice("kafka.locations"),
-	}
-
-	GrpcConfig = &Grpc{
-		Server: vp.GetString("grpc.server"),
-		Port:   vp.GetString("grpc.port"),
-	}
-
-	EtcdConfig = &ETCD{
-		EndPoints: vp.GetStringSlice("etcd.endpoints"),
-		Timeout:   time.Duration(vp.GetInt("etcd.timeout")),
+	err = vp.Unmarshal(&Config)
+	if err != nil {
+		panic(fmt.Errorf("fatal error when unmarshal config file: %w", err))
 	}
 }

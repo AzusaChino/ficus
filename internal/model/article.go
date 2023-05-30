@@ -2,8 +2,10 @@ package model
 
 type Article struct {
 	*Model
-	TagId     uint32 `json:"tag_id"`
-	ArticleId uint32 `json:"article_id"`
+	Title         string `json:"title"`
+	Brief         string `json:"brief"`
+	CoverImageUrl string `json:"cover_image_url"`
+	Content       string `json:"content"`
 }
 
 func (Article) TableName() string {
