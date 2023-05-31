@@ -1,13 +1,14 @@
 package fiberprometheus
 
 import (
+	"strconv"
+	"time"
+
 	"github.com/gofiber/adaptor/v2"
 	"github.com/gofiber/fiber/v2"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
-	"strconv"
-	"time"
 )
 
 type FiberPrometheus struct {
@@ -109,7 +110,7 @@ func (ps *FiberPrometheus) RegisterAt(app *fiber.App, url string) {
 	app.Get(ps.defaultUrl, adaptor.HTTPHandler(promhttp.Handler()))
 }
 
-func (ps *FiberPrometheus) Do() fiber.Handler {
+func (ps *FiberPrometheus) Handler() fiber.Handler {
 	return func(ctx *fiber.Ctx) error {
 		start := time.Now()
 		r := ctx.Route()

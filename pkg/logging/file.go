@@ -2,21 +2,24 @@ package logging
 
 import (
 	"fmt"
-	"github.com/azusachino/ficus/pkg/conf"
 	"os"
 	"time"
+
+	"github.com/azusachino/ficus/pkg/conf"
 )
 
 // getLogFilePath return log file path
 func getLogFilePath() string {
-	return fmt.Sprintf("%s%s%s", conf.AppConfig.RuntimeRootPath, string(os.PathSeparator), conf.AppConfig.LogFileLocation)
+	appConfig := conf.Config.App
+	return fmt.Sprintf("%s%s%s", appConfig.RuntimeRootPath, string(os.PathSeparator), appConfig.LogFileLocation)
 }
 
 // getLogFileName return today's log name
 func getLogFileName() string {
+	appConfig := conf.Config.App
 	return fmt.Sprintf("%s-%s.%s",
-		conf.AppConfig.LogFileSaveName,
-		time.Now().Format(conf.AppConfig.TimeFormat),
-		conf.AppConfig.LogFileExt,
+		appConfig.LogFileSaveName,
+		time.Now().Format(appConfig.TimeFormat),
+		appConfig.LogFileExt,
 	)
 }

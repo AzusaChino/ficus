@@ -1,0 +1,12 @@
+version: "3"
+
+dotenv:
+  - ".env"
+
+tasks:
+  build:
+    cmds:
+      - go build
+  image:
+    cmds:
+      - docker build -t "$AUTHOR/$APP:$VERSION" -f dev-files/docker/Dockerfile

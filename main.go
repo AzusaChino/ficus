@@ -2,12 +2,16 @@ package main
 
 import (
 	"fmt"
+	"log"
+	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
+
 	"github.com/azusachino/ficus/internal/middleware/fiberprometheus"
 	"github.com/azusachino/ficus/internal/middleware/fibertracing"
 	"github.com/azusachino/ficus/internal/routers"
 	"github.com/azusachino/ficus/pkg/conf"
-	"github.com/azusachino/ficus/pkg/etcd"
-	"github.com/azusachino/ficus/pkg/kafka"
 	"github.com/azusachino/ficus/pkg/logging"
 	"github.com/azusachino/ficus/pkg/mydb"
 	"github.com/azusachino/ficus/pkg/pool"
@@ -18,37 +22,31 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/gofiber/fiber/v2/middleware/recover"
 	"github.com/opentracing/opentracing-go"
-	"log"
-	"net/http"
-	"os"
-	"os/signal"
-	"syscall"
 )
 
 const appName = "ficus"
 
+// Init all necessary components
 func init() {
-	conf.Setup()
 	logging.Setup()
 	pool.Setup()
-	kafka.Setup()
 	mydb.SetUp()
-	etcd.Setup()
 }
 
 func main() {
 	defer pool.Close()
-	defer kafka.Close()
 	defer mydb.Close()
-	defer etcd.Close()
+
+	serverConfig := conf.Config.Server
 	cnf := fiber.Config{
-		ReadTimeout:  conf.ServerConfig.ReadTimeout,
-		WriteTimeout: conf.ServerConfig.WriteTimeout,
+		ReadTimeout:  serverConfig.ReadTimeout,
+		WriteTimeout: serverConfig.WriteTimeout,
 		ErrorHandler: func(ctx *fiber.Ctx, err error) error {
 			return ctx.Status(http.StatusInternalServerError).JSON(fmt.Sprintf(`{"error":%v}`, err))
 		},
 		AppName: appName,
 	}
+
 	app := fiber.New(cnf)
 	app.Use(compress.New())
 	app.Use(cors.New())
@@ -74,7 +72,7 @@ func main() {
 	// prometheus metric
 	prometheus := fiberprometheus.New(appName)
 	prometheus.RegisterAt(app, "/metrics")
-	app.Use(prometheus.Do())
+	app.Use(prometheus.Handler())
 
 	// first append url, second local folder
 	app.Static("/static", "./static")
@@ -83,8 +81,9 @@ func main() {
 	app.Use(func(c *fiber.Ctx) error {
 		return c.SendStatus(http.StatusNotFound)
 	})
-	endPoint := fmt.Sprintf(":%d", conf.ServerConfig.HttpPort)
-	log.Printf("start http server listening %s", endPoint)
+
+	endPoint := fmt.Sprintf(":%d", serverConfig.HttpPort)
+	log.Printf("start http server listening %s\n", endPoint)
 
 	go func() {
 		if err := app.Listen(endPoint); err != nil && app.Server() != nil {
@@ -92,7 +91,8 @@ func main() {
 		}
 	}()
 
-	sign := make(chan os.Signal)
+	// listen on INT/TERM
+	sign := make(chan os.Signal, 1)
 	signal.Notify(sign, syscall.SIGINT, syscall.SIGTERM)
 	<-sign
 
@@ -101,5 +101,6 @@ func main() {
 	if err := app.Shutdown(); err != nil {
 		log.Fatalf("app shutdown error: %v\n", err)
 	}
-	log.Println("server shut down finished.")
+
+	log.Println("server shut down finished")
 }

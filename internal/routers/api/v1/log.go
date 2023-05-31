@@ -3,16 +3,16 @@ package v1
 import (
 	"archive/zip"
 	"fmt"
-	"github.com/azusachino/ficus/pkg/conf"
-	"github.com/azusachino/ficus/pkg/pool"
-	"github.com/azusachino/ficus/service/logging_service"
-	"github.com/gofiber/fiber/v2"
 	"io"
 	"log"
 	"net/http"
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/azusachino/ficus/pkg/conf"
+	"github.com/azusachino/ficus/pkg/pool"
+	"github.com/gofiber/fiber/v2"
 )
 
 func UploadFile(c *fiber.Ctx) error {
@@ -20,13 +20,14 @@ func UploadFile(c *fiber.Ctx) error {
 	if err != nil {
 		_ = c.SendStatus(http.StatusInternalServerError)
 	}
-	targetSrc := fmt.Sprintf(`%s%s%s`, conf.AppConfig.RuntimeRootPath, string(os.PathSeparator), file.Filename)
+	appConfig := conf.Config.App
+	targetSrc := fmt.Sprintf(`%s%s%s`, appConfig.RuntimeRootPath, string(os.PathSeparator), file.Filename)
 	// save tmp file
 	_ = c.SaveFile(file, targetSrc)
 
 	// add args to pool
 	_ = pool.Pool.Submit(func() {
-		logging_service.AsyncSend(targetSrc)
+		// logging_service.AsyncSend(targetSrc)
 	})
 
 	return c.JSON(fiber.Map{

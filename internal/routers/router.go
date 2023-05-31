@@ -1,28 +1,31 @@
 package routers
 
 import (
-	"github.com/azusachino/ficus/internal/middleware/ws"
-	"github.com/azusachino/ficus/internal/routers/api/v1"
+	v1 "github.com/azusachino/ficus/internal/routers/api/v1"
 	"github.com/gofiber/fiber/v2"
 )
 
 func InitRouter(app *fiber.App) {
 
-	// normal http router
 	apiV1 := app.Group("/api/v1")
-	{
-		apiV1.Post("/logging/collect", v1.UploadFile)
-		apiV1.Get("/hello/:person", v1.Hello)
-		apiV1.Post("/hi/:person", v1.Hello)
-		apiV1.Get("/say/:name", v1.SayWhat)
 
-		apiV1Grpc := apiV1.Group("/grpc")
-		{
-			apiV1Grpc.Get("/hello/:msg", v1.SayHello)
-		}
+	{
+		// Tag related routers
+		tag := v1.NewTag()
+		apiV1.Get("/tags", tag.List)
+		apiV1.Post("/tags", tag.Create)
+		apiV1.Put("/tags/:id", tag.Update)
+		apiV1.Patch("/tags/:id/state", tag.Update)
+		apiV1.Delete("/tags/:id", tag.Delete)
+
+		// Article related routers
+		article := v1.NewArticle()
+		apiV1.Get("/articles/:id", article.Get)
+		apiV1.Get("/articles", article.List)
+		apiV1.Post("/articles", article.Create)
+		apiV1.Put("/articles/:id", article.Update)
+		apiV1.Patch("/articles/:id/state", article.Update)
+		apiV1.Delete("/articles/:id", article.Delete)
 	}
 
-	// ws router
-	app.Use("/ws", ws.New())
-	app.Get("/ws/:id", v1.WsHandler())
 }
