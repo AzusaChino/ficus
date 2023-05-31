@@ -2,7 +2,7 @@ package fibertracing
 
 import (
 	"context"
-	"github.com/azusachino/ficus/util"
+	"github.com/azusachino/ficus/pkg/util"
 	"github.com/gofiber/fiber/v2"
 	"github.com/opentracing/opentracing-go"
 	"github.com/opentracing/opentracing-go/ext"

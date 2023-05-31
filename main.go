@@ -6,15 +6,16 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"runtime"
 	"syscall"
+	"time"
 
+	"github.com/azusachino/ficus/global"
 	"github.com/azusachino/ficus/internal/middleware/fiberprometheus"
 	"github.com/azusachino/ficus/internal/middleware/fibertracing"
+	"github.com/azusachino/ficus/internal/model"
 	"github.com/azusachino/ficus/internal/routers"
-	"github.com/azusachino/ficus/pkg/conf"
-	"github.com/azusachino/ficus/pkg/logging"
-	"github.com/azusachino/ficus/pkg/mydb"
-	"github.com/azusachino/ficus/pkg/pool"
+	fl "github.com/azusachino/ficus/pkg/logger"
 	"github.com/azusachino/ficus/pkg/tracer"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/compress"
@@ -22,22 +23,34 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/gofiber/fiber/v2/middleware/recover"
 	"github.com/opentracing/opentracing-go"
+	"github.com/panjf2000/ants/v2"
+	"github.com/spf13/viper"
+	"gopkg.in/natefinch/lumberjack.v2"
 )
 
 const appName = "ficus"
 
-// Init all necessary components
 func init() {
-	logging.Setup()
-	pool.Setup()
-	mydb.SetUp()
+	// 1. set up global config
+	setUpConfig()
+	// 2. setup logger
+	setUpLogger()
+	// 3. working pool
+	setUpWorkingPool()
+	// 4. init database
+	setUpDb()
 }
 
 func main() {
-	defer pool.Close()
-	defer mydb.Close()
+	// ensure resources are released
+	defer func() {
+		if global.Pool != nil {
+			global.Pool.Release()
+		}
+	}()
 
-	serverConfig := conf.Config.Server
+	// start the ficus server
+	serverConfig := global.Config.Server
 	cnf := fiber.Config{
 		ReadTimeout:  serverConfig.ReadTimeout,
 		WriteTimeout: serverConfig.WriteTimeout,
@@ -83,11 +96,11 @@ func main() {
 	})
 
 	endPoint := fmt.Sprintf(":%d", serverConfig.HttpPort)
-	log.Printf("start http server listening %s\n", endPoint)
+	global.Logger.Infof("start http server listening %s\n", endPoint)
 
 	go func() {
 		if err := app.Listen(endPoint); err != nil && app.Server() != nil {
-			log.Fatalf("app.Listen error: %v\n", err)
+			global.Logger.Fatalf("app.Listen error: %v\n", err)
 		}
 	}()
 
@@ -96,11 +109,67 @@ func main() {
 	signal.Notify(sign, syscall.SIGINT, syscall.SIGTERM)
 	<-sign
 
-	log.Println("shutting down the server...")
+	global.Logger.Info("shutting down the server...")
 
 	if err := app.Shutdown(); err != nil {
-		log.Fatalf("app shutdown error: %v\n", err)
+		global.Logger.Fatalf("app shutdown error: %v\n", err)
 	}
 
-	log.Println("server shut down finished")
+	global.Logger.Info("server shut down finished")
+}
+
+func setUpConfig() {
+	var err error
+	vp := viper.New()
+	vp.SetConfigName("ficus")
+	vp.SetConfigType("yaml")
+	vp.AddConfigPath("configs")
+	if err = vp.ReadInConfig(); err != nil {
+		panic(fmt.Errorf("fatal error when reading config file: %w", err))
+	}
+	err = vp.Unmarshal(&global.Config)
+	if err != nil {
+		panic(fmt.Errorf("fatal error when unmarshal config file: %w", err))
+	}
+}
+
+func setUpWorkingPool() {
+	var err error
+	size := runtime.NumCPU()
+
+	global.Pool, err = ants.NewPool(size,
+		ants.WithExpiryDuration(100*time.Second),
+		ants.WithPanicHandler(func(i interface{}) {
+			global.Logger.Fatal(i)
+		}),
+		ants.WithLogger(log.Default()))
+	if err != nil {
+		panic(fmt.Errorf("error when setup ants pool: %v", err))
+	}
+}
+
+func setUpDb() {
+	var err error
+	global.DbEngine, err = model.NewDbEngine(&global.Config.Database)
+	if err != nil {
+		panic(fmt.Errorf("fatal error when connect database: %w", err))
+	}
+}
+
+func setUpLogger() {
+	appConfig := global.Config.App
+	logFileName := fmt.Sprintf("%s%s%s-%s.%s",
+		appConfig.LogFileLocation,
+		string(os.PathSeparator),
+		appConfig.LogFileSaveName,
+		time.Now().Format(appConfig.TimeFormat),
+		appConfig.LogFileExt,
+	)
+	lj := lumberjack.Logger{
+		Filename:  logFileName,
+		MaxSize:   600,
+		MaxAge:    7,
+		LocalTime: true,
+	}
+	global.Logger = fl.NewLogger(&lj, "", log.LstdFlags).WithCaller(2)
 }

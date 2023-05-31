@@ -3,7 +3,6 @@ module github.com/azusachino/ficus
 go 1.18
 
 require (
-	github.com/go-sql-driver/mysql v1.7.1
 	github.com/gofiber/adaptor/v2 v2.2.1
 	github.com/gofiber/fiber/v2 v2.46.0
 	github.com/gofiber/websocket/v2 v2.2.1
@@ -13,8 +12,10 @@ require (
 	github.com/spf13/viper v1.16.0
 	github.com/uber/jaeger-client-go v2.30.0+incompatible
 	google.golang.org/grpc v1.55.0
+	gopkg.in/natefinch/lumberjack.v2 v2.2.1
 	gorm.io/driver/postgres v1.5.2
 	gorm.io/gorm v1.25.1
+
 )
 
 require (
