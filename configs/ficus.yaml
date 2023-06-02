@@ -7,19 +7,18 @@ app:
 server:
   runMode: debug
   httpPort: 8090
-  readTimeout: 60
-  writeTimeout: 60
+  readTimeout: 60s
+  writeTimeout: 60s
 database:
   # dbType: postgres
-  dbName: db_ficus
-  dbUser: root
-  dbPass: 123456
-  dbHost: 127.0.0.1
+  dbName: postgres
+  dbUser: postgres
   dbPort: 5432
   tablePrefix: tb_
   charset: utf8
   maxIdleConns: 10
   maxOpenConns: 100
+  sslMode: disable
 # kafka:
 #   locations:
 #     - 127.0.0.1:9092

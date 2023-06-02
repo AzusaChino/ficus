@@ -3,8 +3,10 @@ package model
 import (
 	"database/sql"
 	"fmt"
+	"os"
 	"time"
 
+	"github.com/azusachino/ficus/global"
 	"github.com/azusachino/ficus/pkg/conf"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -21,9 +23,12 @@ type Model struct {
 }
 
 func NewDbEngine(dbConfig *conf.DatabaseConfig) (*gorm.DB, error) {
+	pgHost := os.Getenv(global.PG_HOST)
+	pgPass := os.Getenv(global.PG_PASS)
 	// open postgres connection
-	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%d sslmode=disable", dbConfig.DbHost, dbConfig.DbUser, dbConfig.DbPass, dbConfig.DbName, dbConfig.DbPort)
-	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	connStr := fmt.Sprintf("postgres://%s:%s@%s:%d/%s?sslmode=%s",
+		dbConfig.DbUser, pgPass, pgHost, dbConfig.DbPort, dbConfig.DbName, dbConfig.SslMode)
+	db, err := gorm.Open(postgres.Open(connStr), &gorm.Config{})
 	if err != nil {
 		panic("failed to connect database")
 	}

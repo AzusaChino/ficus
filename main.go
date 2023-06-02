@@ -12,17 +12,15 @@ import (
 
 	"github.com/azusachino/ficus/global"
 	"github.com/azusachino/ficus/internal/middleware/fiberprometheus"
-	"github.com/azusachino/ficus/internal/middleware/fibertracing"
 	"github.com/azusachino/ficus/internal/model"
 	"github.com/azusachino/ficus/internal/routers"
 	fl "github.com/azusachino/ficus/pkg/logger"
-	"github.com/azusachino/ficus/pkg/tracer"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/compress"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/gofiber/fiber/v2/middleware/recover"
-	"github.com/opentracing/opentracing-go"
+	"github.com/joho/godotenv"
 	"github.com/panjf2000/ants/v2"
 	"github.com/spf13/viper"
 	"gopkg.in/natefinch/lumberjack.v2"
@@ -31,14 +29,17 @@ import (
 const appName = "ficus"
 
 func init() {
+	// load env
+	godotenv.Load("ficus.env")
+
 	// 1. set up global config
-	setUpConfig()
+	initConfig()
 	// 2. setup logger
-	setUpLogger()
+	initLogger()
 	// 3. working pool
-	setUpWorkingPool()
+	initWorkingPool()
 	// 4. init database
-	setUpDb()
+	initDb()
 }
 
 func main() {
@@ -73,12 +74,12 @@ func main() {
 		recover.Config{
 			EnableStackTrace: true,
 		}))
-	tracer.New(tracer.Config{
-		ServiceName: appName,
-	})
-	app.Use(fibertracing.New(fibertracing.Config{
-		Tracer: opentracing.GlobalTracer(),
-	}))
+	// tracer.New(tracer.Config{
+	// 	ServiceName: appName,
+	// })
+	// app.Use(fibertracing.New(fibertracing.Config{
+	// 	Tracer: opentracing.GlobalTracer(),
+	// }))
 
 	routers.InitRouter(app)
 
@@ -118,7 +119,7 @@ func main() {
 	global.Logger.Info("server shut down finished")
 }
 
-func setUpConfig() {
+func initConfig() {
 	var err error
 	vp := viper.New()
 	vp.SetConfigName("ficus")
@@ -133,7 +134,7 @@ func setUpConfig() {
 	}
 }
 
-func setUpWorkingPool() {
+func initWorkingPool() {
 	var err error
 	size := runtime.NumCPU()
 
@@ -148,7 +149,7 @@ func setUpWorkingPool() {
 	}
 }
 
-func setUpDb() {
+func initDb() {
 	var err error
 	global.DbEngine, err = model.NewDbEngine(&global.Config.Database)
 	if err != nil {
@@ -156,7 +157,7 @@ func setUpDb() {
 	}
 }
 
-func setUpLogger() {
+func initLogger() {
 	appConfig := global.Config.App
 	logFileName := fmt.Sprintf("%s%s%s-%s.%s",
 		appConfig.LogFileLocation,

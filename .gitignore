@@ -20,3 +20,5 @@ runtime/
 logs/
 
 ficus
+.env
+ficus.env

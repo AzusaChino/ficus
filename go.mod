@@ -6,6 +6,7 @@ require (
 	github.com/gofiber/adaptor/v2 v2.2.1
 	github.com/gofiber/fiber/v2 v2.46.0
 	github.com/gofiber/websocket/v2 v2.2.1
+	github.com/joho/godotenv v1.5.1
 	github.com/opentracing/opentracing-go v1.2.0
 	github.com/panjf2000/ants/v2 v2.7.4
 	github.com/prometheus/client_golang v1.15.1

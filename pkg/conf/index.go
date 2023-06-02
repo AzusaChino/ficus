@@ -27,10 +27,11 @@ type ServerConfig struct {
 }
 
 type DatabaseConfig struct {
-	DbName      string `mapstructure:"dbName" json:"dbName" yaml:"dbName"`
-	DbHost      string `mapstructure:"dbHost" json:"dbHost" yaml:"dbHost"`
-	DbPort      int    `mapstructure:"dbPort" json:"dbPort" yaml:"dbPort"`
-	DbUser      string `mapstructure:"dbUser" json:"dbUser" yaml:"dbUser"`
-	DbPass      string `mapstructure:"dbPass" json:"dbPass" yaml:"dbPass"`
+	DbName string `mapstructure:"dbName" json:"dbName" yaml:"dbName"`
+	DbPort int    `mapstructure:"dbPort" json:"dbPort" yaml:"dbPort"`
+	DbUser string `mapstructure:"dbUser" json:"dbUser" yaml:"dbUser"`
+	// DbHost string `mapstructure:"dbHost" json:"dbHost" yaml:"dbHost"`
+	// DbPass      string `mapstructure:"dbPass" json:"dbPass" yaml:"dbPass"`
 	TablePrefix string `mapstructure:"tablePrefix" json:"tablePrefix" yaml:"tablePrefix"`
+	SslMode     string `mapstructure:"sslMode" json:"sslMode" yaml:"sslMode"`
 }
