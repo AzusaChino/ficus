@@ -1,4 +1,4 @@
-create database db_ficus ENCODING UTF8;
+CREATE DATABASE db_ficus ENCODING UTF8;
 
 create table if not exists tb_tag (
     id serial primary key,

@@ -1,4 +1,4 @@
-FROM golang:1.18 as builder
+FROM golang:1.22 as builder
 LABEL maintainer="az <azusachino@duck.com>"
 WORKDIR /app
 COPY go.mod go.sum ./

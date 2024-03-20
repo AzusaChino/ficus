@@ -1,0 +1,13 @@
+version: "3.8"
+
+services:
+  postgres:
+    container_name: ficus_db
+    image: docker.io/library/postgres:16-alpine
+    env_file:
+      - postgres.env
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./initdb.d:/docker-entrypoint-initdb.d
+      - ./data-dev:/var/lib/postgresql/data

@@ -11,8 +11,8 @@ import (
 	"time"
 
 	"github.com/azusachino/ficus/global"
+	"github.com/azusachino/ficus/internal/dao"
 	"github.com/azusachino/ficus/internal/middleware/fiberprometheus"
-	"github.com/azusachino/ficus/internal/model"
 	"github.com/azusachino/ficus/internal/routers"
 	fl "github.com/azusachino/ficus/pkg/logger"
 	"github.com/gofiber/fiber/v2"
@@ -151,7 +151,7 @@ func initWorkingPool() {
 
 func initDb() {
 	var err error
-	global.DbEngine, err = model.NewDbEngine(&global.Config.Database)
+	global.DbEngine, err = dao.NewDbEngine(&global.Config.Database)
 	if err != nil {
 		panic(fmt.Errorf("fatal error when connect database: %w", err))
 	}

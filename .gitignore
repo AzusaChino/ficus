@@ -21,4 +21,5 @@ logs/
 
 ficus
 .env
-ficus.env
+data-*/
+
