@@ -4,14 +4,12 @@ import (
 	"archive/zip"
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 	"os"
 	"path/filepath"
 	"strings"
 
-	"github.com/azusachino/ficus/pkg/conf"
-	"github.com/azusachino/ficus/pkg/pool"
+	"github.com/azusachino/ficus/global"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -20,13 +18,13 @@ func UploadFile(c *fiber.Ctx) error {
 	if err != nil {
 		_ = c.SendStatus(http.StatusInternalServerError)
 	}
-	appConfig := conf.Config.App
+	appConfig := global.Config.App
 	targetSrc := fmt.Sprintf(`%s%s%s`, appConfig.RuntimeRootPath, string(os.PathSeparator), file.Filename)
 	// save tmp file
 	_ = c.SaveFile(file, targetSrc)
 
 	// add args to pool
-	_ = pool.Pool.Submit(func() {
+	_ = global.Pool.Submit(func() {
 		// logging_service.AsyncSend(targetSrc)
 	})
 
@@ -49,7 +47,7 @@ func _(src string, dest string) ([]string, error) {
 	defer func(r *zip.ReadCloser) {
 		err := r.Close()
 		if err != nil {
-			log.Fatalf("err: %v", err)
+			global.Logger.Fatalf("err: %v", err)
 		}
 	}(r)
 

@@ -1,18 +1,7 @@
 package conf
 
 import (
-	"fmt"
 	"time"
-
-	"github.com/spf13/viper"
-)
-
-var (
-	Config = &FicusConfig{
-		App:      AppConfig{},
-		Server:   ServerConfig{},
-		Database: DatabaseConfig{},
-	}
 )
 
 // FicusConfig the application config structure
@@ -38,25 +27,11 @@ type ServerConfig struct {
 }
 
 type DatabaseConfig struct {
-	DbName      string `mapstructure:"dbName" json:"dbName" yaml:"dbName"`
-	DbHost      string `mapstructure:"dbHost" json:"dbHost" yaml:"dbHost"`
-	DbPort      int    `mapstructure:"dbPort" json:"dbPort" yaml:"dbPort"`
-	DbUser      string `mapstructure:"dbUser" json:"dbUser" yaml:"dbUser"`
-	DbPass      string `mapstructure:"dbPass" json:"dbPass" yaml:"dbPass"`
+	DbName string `mapstructure:"dbName" json:"dbName" yaml:"dbName"`
+	DbPort int    `mapstructure:"dbPort" json:"dbPort" yaml:"dbPort"`
+	DbUser string `mapstructure:"dbUser" json:"dbUser" yaml:"dbUser"`
+	// DbHost string `mapstructure:"dbHost" json:"dbHost" yaml:"dbHost"`
+	// DbPass      string `mapstructure:"dbPass" json:"dbPass" yaml:"dbPass"`
 	TablePrefix string `mapstructure:"tablePrefix" json:"tablePrefix" yaml:"tablePrefix"`
-}
-
-func init() {
-	var err error
-	vp := viper.New()
-	vp.SetConfigName("ficus")
-	vp.SetConfigType("yaml")
-	vp.AddConfigPath("configs")
-	if err = vp.ReadInConfig(); err != nil {
-		panic(fmt.Errorf("fatal error when reading config file: %w", err))
-	}
-	err = vp.Unmarshal(&Config)
-	if err != nil {
-		panic(fmt.Errorf("fatal error when unmarshal config file: %w", err))
-	}
+	SslMode     string `mapstructure:"sslMode" json:"sslMode" yaml:"sslMode"`
 }

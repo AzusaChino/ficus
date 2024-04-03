@@ -1,9 +1,20 @@
 version: "3"
 
 dotenv:
-  - ".env"
+  - "task.env"
 
 tasks:
+  setup:
+    cmds:
+      - podman-compose -f scripts/compose.yaml up
+  cleanup:
+    cmds:
+      - podman rm -f $(podman ps -a | grep ficus_db | awk '{print $1}')
+      - rm -rf ./scripts/data-dev/*
+  mod:
+    cmds:
+      - go mod tidy
+      - go mod vendor
   build:
     cmds:
       - go build

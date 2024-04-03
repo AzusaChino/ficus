@@ -5,18 +5,18 @@ import (
 	"os"
 	"time"
 
-	"github.com/azusachino/ficus/pkg/conf"
+	"github.com/azusachino/ficus/global"
 )
 
 // getLogFilePath return log file path
 func getLogFilePath() string {
-	appConfig := conf.Config.App
+	appConfig := global.Config.App
 	return fmt.Sprintf("%s%s%s", appConfig.RuntimeRootPath, string(os.PathSeparator), appConfig.LogFileLocation)
 }
 
 // getLogFileName return today's log name
 func getLogFileName() string {
-	appConfig := conf.Config.App
+	appConfig := global.Config.App
 	return fmt.Sprintf("%s-%s.%s",
 		appConfig.LogFileSaveName,
 		time.Now().Format(appConfig.TimeFormat),
