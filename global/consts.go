@@ -2,5 +2,12 @@ package global
 
 const (
 	PG_HOST = "PG_HOST"
+	PG_PORT = "PG_PORT"
 	PG_PASS = "PG_PASS"
+
+	REDIS_HOST = "REDIS_HOST"
+	REDIS_PORT = "REDIS_PORT"
+	REDIS_PASS = "REDIS_PASS"
+
+	KAFKA_ADDR = "KAFKA_ADDR"
 )
