@@ -26,10 +26,8 @@ import (
 	"gopkg.in/natefinch/lumberjack.v2"
 )
 
-const appName = "ficus"
-
 func init() {
-	// load env
+	// 0. load env
 	godotenv.Load("ficus.env")
 
 	// 1. set up global config
@@ -50,6 +48,7 @@ func main() {
 		}
 	}()
 
+	var appName = os.Getenv(global.APP)
 	// start the ficus server
 	serverConfig := global.Config.Server
 	cnf := fiber.Config{

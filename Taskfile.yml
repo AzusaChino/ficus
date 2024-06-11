@@ -1,7 +1,7 @@
 version: "3"
 
 dotenv:
-  - "task.env"
+  - "ficus.env"
 
 tasks:
   setup:
@@ -11,7 +11,7 @@ tasks:
     cmds:
       - podman rm -f $(podman ps -a | grep ficus_db | awk '{print $1}')
       - rm -rf ./scripts/data-dev/*
-  mod:
+  vendor:
     cmds:
       - go mod tidy
       - go mod vendor
@@ -20,4 +20,4 @@ tasks:
       - go build
   image:
     cmds:
-      - docker build -t "$AUTHOR/$APP:$VERSION" -f dev-files/docker/Dockerfile
+      - docker build -t "$APP_AUTHOR/$APP:$APP_VERSION" -f dev-files/docker/Dockerfile

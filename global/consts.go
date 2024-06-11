@@ -1,6 +1,7 @@
 package global
 
 const (
+	APP     = "APP"
 	PG_HOST = "PG_HOST"
 	PG_PORT = "PG_PORT"
 	PG_PASS = "PG_PASS"

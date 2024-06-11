@@ -3,6 +3,7 @@ package global
 import (
 	"github.com/azusachino/ficus/pkg/conf"
 	"github.com/azusachino/ficus/pkg/logger"
+	"github.com/go-redis/redis"
 	"github.com/panjf2000/ants/v2"
 	"gorm.io/gorm"
 )
@@ -23,4 +24,7 @@ var (
 
 	// Global Logger
 	Logger *logger.Logger
+
+    // Redis Client
+    RedisClient *redis.Client
 )
