@@ -41,7 +41,7 @@ func init() {
 }
 
 func main() {
-	// ensure resources are released
+	// ensure all resources are released
 	defer func() {
 		if global.Pool != nil {
 			global.Pool.Release()
