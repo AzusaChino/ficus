@@ -20,6 +20,8 @@ runtime/
 logs/
 
 ficus
-.env
 data-*/
+
+# env
+prod.env
 

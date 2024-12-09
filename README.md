@@ -4,9 +4,7 @@ Ficus (フィークス) 无花果
 
 ## description
 
-1. a blog management service
-2. build with go and gofiber
-3. should be high performance
+a project based on the course from udemy.
 
 ## setup
 
@@ -33,3 +31,4 @@ go install github.com/go-task/task/v3/cmd/task@latest
 
 - [gofiber](https://github.com/gofiber/fiber)
 - [testcontainers](https://testcontainers.com/guides/getting-started-with-testcontainers-for-go/)
+- [backend master class](https://www.udemy.com/course/backend-master-class-golang-postgresql-kubernetes)
